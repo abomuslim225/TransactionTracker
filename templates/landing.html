@@ -1,0 +1,3207 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hisob — pulingizni tushuning</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+          rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0F1C1A;
+            --bg-alt: #16241F;
+            --paper: #EFE7D8;
+            --ink: #E9E4D8;
+            --ink-dim: #A9B0A7;
+            --income: #4FA381;
+            --expense: #B5573E;
+            --gold: #C9A227;
+            --line: rgba(233, 228, 216, 0.12);
+            --radius: 14px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--ink);
+            font-family: 'IBM Plex Sans', sans-serif;
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(var(--line) 1px, transparent 1px),
+            linear-gradient(90deg, var(--line) 1px, transparent 1px);
+            background-size: 64px 64px;
+            opacity: 0.35;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        :focus-visible {
+            outline: 2px solid var(--gold);
+            outline-offset: 3px;
+        }
+
+        .wrap {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 0 32px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .wrap.narrow {
+            max-width: 900px;
+        }
+
+        /* ---------- NAV ---------- */
+        nav.wrap {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 28px;
+            padding-bottom: 28px;
+            z-index: 20;
+        }
+
+        .logo {
+            font-family: 'Fraunces', serif;
+            font-size: 22px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo .mark {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--gold);
+            display: inline-block;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 14.5px;
+            font-weight: 500;
+            padding: 11px 20px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            cursor: pointer;
+            transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+            background: transparent;
+            color: var(--ink);
+        }
+
+        .btn:hover {
+            border-color: var(--gold);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: var(--gold);
+            color: #17140A;
+            border-color: var(--gold);
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            background: #DAB847;
+        }
+
+        .btn-ghost {
+            border-color: transparent;
+            color: var(--ink-dim);
+        }
+
+        .btn-ghost:hover {
+            color: var(--ink);
+            border-color: var(--line);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ---------- ICON BUTTON / MENU / LANG SWITCH ---------- */
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: 1px solid var(--line);
+            background: transparent;
+            color: var(--ink);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color 0.15s ease, transform 0.15s ease;
+        }
+
+        .icon-btn:hover {
+            border-color: var(--gold);
+            transform: translateY(-1px);
+        }
+
+        .icon-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        #menu-btn {
+            display: none;
+        }
+
+        .lang-switch {
+            position: relative;
+        }
+
+        .lang-btn {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12.5px;
+            font-weight: 600;
+            padding: 9px 14px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: transparent;
+            color: var(--ink);
+            cursor: pointer;
+            letter-spacing: 0.04em;
+        }
+
+        .lang-btn:hover {
+            border-color: var(--gold);
+        }
+
+        .lang-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: var(--bg-alt);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 6px;
+            min-width: 130px;
+            z-index: 60;
+        }
+
+        .lang-dropdown.show {
+            display: block;
+        }
+
+        .lang-option {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 9px 12px;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            color: var(--ink);
+            font-size: 13.5px;
+            cursor: pointer;
+            font-family: 'IBM Plex Sans', sans-serif;
+        }
+
+        .lang-option:hover {
+            background: var(--line);
+        }
+
+        .lang-option.active {
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        .side-menu-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 28, 26, 0.6);
+            z-index: 55;
+        }
+
+        .side-menu-overlay.show {
+            display: block;
+        }
+
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 280px;
+            max-width: 82vw;
+            background: var(--bg-alt);
+            border-right: 1px solid var(--line);
+            padding: 26px 20px;
+            transform: translateX(-100%);
+            transition: transform 0.22s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .side-menu-overlay.show .side-menu {
+            transform: translateX(0);
+        }
+
+        .side-menu-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 22px;
+        }
+
+        .side-menu-close {
+            background: none;
+            border: none;
+            color: var(--ink-dim);
+            cursor: pointer;
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        .side-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 13px 12px;
+            border-radius: 10px;
+            background: none;
+            border: none;
+            color: var(--ink);
+            font-size: 15px;
+            text-align: left;
+            cursor: pointer;
+            font-family: 'IBM Plex Sans', sans-serif;
+            width: 100%;
+        }
+
+        .side-menu-item:hover {
+            background: var(--line);
+        }
+
+        .side-menu-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px 20px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .side-menu-avatar-wrap {
+            position: relative;
+            width: 44px;
+            height: 44px;
+            flex-shrink: 0;
+        }
+
+        .side-menu-avatar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid var(--line);
+            background: var(--bg);
+        }
+
+        #side-menu-avatar-placeholder {
+            padding: 10px;
+            color: var(--ink-dim);
+        }
+
+        .side-menu-user-name {
+            font-family: 'Fraunces', serif;
+            font-size: 15px;
+            color: var(--paper);
+            line-height: 1.3;
+        }
+
+        .side-menu-user-email {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11.5px;
+            color: var(--ink-dim);
+            margin-top: 2px;
+            word-break: break-all;
+        }
+
+        .avatar-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .avatar-preview {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid var(--line);
+            background: var(--bg);
+        }
+
+        .avatar-upload-btn {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 13px;
+            padding: 9px 14px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: transparent;
+            color: var(--ink-dim);
+            cursor: pointer;
+        }
+
+        .avatar-upload-btn:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        .avatar-preview-wrap {
+            position: relative;
+            width: 64px;
+            height: 64px;
+            flex-shrink: 0;
+        }
+
+        .avatar-preview-wrap .avatar-preview {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        #avatar-placeholder {
+            padding: 15px;
+            color: var(--ink-dim);
+        }
+
+        /* ---------- HERO (mehmon) ---------- */
+        .hero {
+            padding: 64px 0 96px;
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 56px;
+            align-items: center;
+        }
+
+        .eyebrow {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12.5px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 18px;
+        }
+
+        h1 {
+            font-family: 'Fraunces', serif;
+            font-weight: 500;
+            font-size: clamp(38px, 5vw, 58px);
+            line-height: 1.05;
+            letter-spacing: -0.01em;
+            color: var(--paper);
+            margin-bottom: 22px;
+        }
+
+        h1 em {
+            font-style: italic;
+            color: var(--income);
+        }
+
+        .lede {
+            font-size: 17px;
+            color: var(--ink-dim);
+            max-width: 46ch;
+            margin-bottom: 34px;
+        }
+
+        .hero-cta {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 40px;
+        }
+
+        .cta-note {
+            font-size: 13.5px;
+            color: var(--ink-dim);
+        }
+
+        .ticker {
+            font-family: 'IBM Plex Mono', monospace;
+            display: inline-flex;
+            align-items: baseline;
+            gap: 10px;
+            padding: 14px 18px;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            background: var(--bg-alt);
+        }
+
+        .ticker .label {
+            font-size: 11px;
+            color: var(--ink-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .ticker .num {
+            font-size: 20px;
+            color: var(--income);
+            font-weight: 500;
+        }
+
+        /* ---------- DONUT / CHART CARD (umumiy: mehmon va login) ---------- */
+        .chart-card {
+            background: var(--bg-alt);
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            padding: 30px;
+            position: relative;
+        }
+
+        .chart-card .card-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 22px;
+        }
+
+        .chart-card .card-title {
+            font-family: 'Fraunces', serif;
+            font-size: 17px;
+            color: var(--paper);
+        }
+
+        .chart-card .card-sub {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: var(--ink-dim);
+        }
+
+        .donut-wrap {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            flex-wrap: wrap;
+        }
+
+        .donut-total {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 15px;
+            fill: var(--paper);
+        }
+
+        .donut-total-label {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 9.5px;
+            fill: var(--ink-dim);
+            letter-spacing: 0.06em;
+        }
+
+        #auth-donut-total-text {
+            font-size: 22px;
+        }
+
+        .legend {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .legend-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13.5px;
+        }
+
+        .legend-name {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            color: var(--ink);
+        }
+
+        .dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .legend-pct {
+            font-family: 'IBM Plex Mono', monospace;
+            color: var(--ink-dim);
+            font-size: 12.5px;
+        }
+
+        .donut-seg {
+            transition: stroke-dashoffset 1.1s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .donut-empty-seg {
+            stroke: #5C665F;
+            opacity: 0.55;
+        }
+
+        .empty-note {
+            color: var(--ink-dim);
+            font-size: 14px;
+        }
+
+        /* ---------- FEATURES (mehmon) ---------- */
+        .features {
+            padding: 8px 0 100px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: var(--line);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .feature {
+            background: var(--bg);
+            padding: 30px 28px;
+        }
+
+        .feature .ficon {
+            width: 34px;
+            height: 34px;
+            margin-bottom: 18px;
+            color: var(--gold);
+        }
+
+        .feature h3 {
+            font-family: 'Fraunces', serif;
+            font-weight: 500;
+            font-size: 18px;
+            color: var(--paper);
+            margin-bottom: 8px;
+        }
+
+        .feature p {
+            font-size: 14px;
+            color: var(--ink-dim);
+            line-height: 1.55;
+        }
+
+        /* ---------- LOGIN QILINGAN HOLAT: TO'LIQ DASHBOARD ---------- */
+        #dashboard {
+            display: none;
+            padding: 40px 0 100px;
+        }
+
+        #dashboard.show {
+            display: block;
+        }
+
+        .hero.hide-for-auth {
+            display: none;
+        }
+
+
+        .balance-card {
+            background: var(--bg-alt);
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            padding: 20px 28px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        .balance-card .eyebrow {
+            margin-bottom: 4px;
+        }
+
+        .balance-main {
+            font-family: 'Fraunces', serif;
+            font-weight: 500;
+            font-size: clamp(24px, 3.4vw, 30px);
+            color: var(--paper);
+        }
+
+        .balance-currency-select {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 13.5px;
+            font-weight: 600;
+            padding: 10px 16px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: var(--bg);
+            color: var(--ink);
+            cursor: pointer;
+        }
+
+        .balance-currency-select:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        #dashboard .chart-card {
+            padding: 36px;
+        }
+
+        .notif-card {
+            background: var(--bg-alt);
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            padding: 28px;
+        }
+
+        .notif-card .scroll-body {
+            max-height: 420px;
+            overflow-y: auto;
+        }
+
+        .action-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .action-btn {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            padding: 18px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: transform 0.15s ease, opacity 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: none;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .action-btn.income {
+            background: rgba(79, 163, 129, 0.14);
+            border: 1px solid var(--income);
+            color: #A9D9C4;
+        }
+
+        .action-btn.expense {
+            background: rgba(181, 87, 62, 0.14);
+            border: 1px solid var(--expense);
+            color: #E0B3A5;
+        }
+
+        .notif-card {
+            background: var(--bg-alt);
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            padding: 28px;
+        }
+
+        .notif-card .card-title {
+            font-family: 'Fraunces', serif;
+            font-size: 17px;
+            color: var(--paper);
+            margin-bottom: 18px;
+        }
+
+        .notif-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            background: var(--line);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .notif-item {
+            background: var(--bg-alt);
+            padding: 14px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .notif-text {
+            font-size: 14px;
+            color: var(--ink);
+        }
+
+        .notif-text .n-name {
+            font-weight: 500;
+        }
+
+        .notif-amount {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 13.5px;
+            white-space: nowrap;
+        }
+
+        .notif-amount.income {
+            color: var(--income);
+        }
+
+        .notif-amount.expense {
+            color: var(--expense);
+        }
+
+        .notif-date {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: var(--ink-dim);
+            margin-top: 2px;
+        }
+
+        .notif-status-tag {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: var(--gold);
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 3px 10px;
+            white-space: nowrap;
+        }
+
+        .confirm-btn {
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 12.5px;
+            font-weight: 600;
+            border-radius: 999px;
+            padding: 8px 16px;
+            cursor: pointer;
+            white-space: nowrap;
+            background: var(--gold);
+            border: 1px solid var(--gold);
+            color: #17140A;
+        }
+
+        .confirm-btn:disabled {
+            background: transparent;
+            border: 1px solid var(--line);
+            color: var(--ink-dim);
+            cursor: not-allowed;
+        }
+
+        .row-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .row-icon-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            border: 1px solid var(--line);
+            background: transparent;
+            color: var(--ink-dim);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color 0.15s ease, color 0.15s ease;
+        }
+
+        .row-icon-btn:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        .row-icon-btn.danger:hover {
+            border-color: var(--expense);
+            color: var(--expense);
+        }
+
+        .row-icon-btn svg {
+            width: 15px;
+            height: 15px;
+        }
+
+        .type-toggle-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .type-toggle-btn {
+            flex: 1;
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 11px;
+            border-radius: 10px;
+            border: 1px solid var(--line);
+            background: var(--bg);
+            color: var(--ink-dim);
+            cursor: pointer;
+            transition: border-color 0.15s ease, color 0.15s ease;
+        }
+
+        .type-toggle-btn.active.income {
+            border-color: var(--income);
+            color: #A9D9C4;
+            background: rgba(79, 163, 129, 0.12);
+        }
+
+        .type-toggle-btn.active.expense {
+            border-color: var(--expense);
+            color: #E0B3A5;
+            background: rgba(181, 87, 62, 0.12);
+        }
+
+        .notif-corner-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+
+        /* ---------- MODAL: TRANZAKSIYA QO'SHISH / PROFIL ---------- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 28, 26, 0.72);
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            padding: 20px;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-card {
+            width: 100%;
+            max-width: 420px;
+            background: var(--bg-alt);
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            padding: 32px;
+        }
+
+        .modal-card h2 {
+            font-family: 'Fraunces', serif;
+            font-weight: 500;
+            font-size: 24px;
+            color: var(--paper);
+            margin-bottom: 22px;
+        }
+
+        .field {
+            margin-bottom: 16px;
+        }
+
+        .row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .modal-card label {
+            display: block;
+            font-size: 12px;
+            color: var(--ink-dim);
+            margin-bottom: 7px;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        .modal-card input, .modal-card select, .modal-card textarea {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 11px 13px;
+            color: var(--ink);
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 14px;
+        }
+
+        .modal-card input:focus, .modal-card select:focus, .modal-card textarea:focus {
+            border-color: var(--gold);
+            outline: none;
+        }
+
+        .modal-card input:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        .modal-card textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .field.has-error input, .field.has-error select {
+            border-color: var(--expense);
+        }
+
+        .error-text {
+            font-size: 12px;
+            color: var(--expense);
+            margin-top: 6px;
+            display: none;
+        }
+
+        .field.has-error .error-text {
+            display: block;
+        }
+
+        .top-error {
+            background: rgba(181, 87, 62, 0.12);
+            border: 1px solid var(--expense);
+            color: #E0B3A5;
+            font-size: 13px;
+            padding: 11px 14px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .top-error.show {
+            display: block;
+        }
+
+        .top-success {
+            background: rgba(79, 163, 129, 0.12);
+            border: 1px solid var(--income);
+            color: #A9D9C4;
+            font-size: 13px;
+            padding: 11px 14px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .modal-submit {
+            flex: 1;
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 14.5px;
+            font-weight: 600;
+            padding: 13px 20px;
+            border-radius: 999px;
+            border: 1px solid var(--gold);
+            background: var(--gold);
+            color: #17140A;
+            cursor: pointer;
+        }
+
+        .modal-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .modal-cancel {
+            padding: 13px 20px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: transparent;
+            color: var(--ink-dim);
+            cursor: pointer;
+        }
+
+        .security-divider {
+            height: 1px;
+            background: var(--line);
+            margin: 26px 0 18px;
+        }
+
+        .security-title {
+            font-family: 'Fraunces', serif;
+            font-size: 16px;
+            color: var(--paper);
+            margin-bottom: 14px;
+        }
+
+        .modal-submit.expense-mode {
+            background: var(--expense);
+            border-color: var(--expense);
+            color: var(--paper);
+        }
+
+        footer.wrap {
+            padding: 28px 0 44px;
+            border-top: 1px solid var(--line);
+            display: flex;
+            justify-content: space-between;
+            color: var(--ink-dim);
+            font-size: 13px;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        @media (max-width: 880px) {
+            .hero {
+                grid-template-columns: 1fr;
+                padding-top: 40px;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .wrap {
+                padding: 0 20px;
+            }
+
+            .hero-cta {
+                flex-wrap: wrap;
+            }
+
+            .donut-wrap {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .action-row, .row-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+
+            .donut-seg {
+                transition: none;
+            }
+
+            * {
+                animation: none !important;
+            }
+        }
+
+        .dual-donut-wrap {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .donut-block {
+            flex: 1;
+            min-width: 220px;
+        }
+
+        .donut-block-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            color: var(--ink-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 12px;
+        }
+
+        @media (max-width: 700px) {
+            .dual-donut-wrap {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="wrap">
+    <div style="display:flex; align-items:center; gap:14px;">
+        <button class="icon-btn" id="menu-btn" aria-label="Menyu" title="Menyu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                <path d="M3 6h18M3 12h18M3 18h18"/>
+            </svg>
+        </button>
+        <div class="logo"><span class="mark"></span>Hisob</div>
+    </div>
+    <div class="nav-actions" id="nav-actions">
+        <!-- JS quyidagi ikki holatdan birini ko'rsatadi -->
+    </div>
+</nav>
+
+<main class="wrap">
+
+    <!-- ===== MEHMON HOLATI: birinchi marta kirgan foydalanuvchi ===== -->
+    <section class="hero" id="hero">
+        <div>
+            <div class="eyebrow" data-i18n="hero_eyebrow">Shaxsiy moliya hisobchisi</div>
+            <h1>Pulingiz qayerga <em>ketayotganini</em><br>aniq bilib turing.</h1>
+            <p class="lede" data-i18n="hero_lede">
+                Kirim va chiqimlaringizni kiriting — Hisob ularni kategoriyalarga ajratib,
+                oylik balansingizni va xarajat taqsimotingizni bir qarashda ko'rsatadi.
+            </p>
+            <div class="hero-cta">
+                <button class="btn btn-primary" onclick="location.href='/register.html'" data-i18n="nav_register">Bepul
+                    boshlash
+                </button>
+                <span class="cta-note" data-i18n="hero_cta_note">Ro'yxatdan o'tish 1 daqiqa vaqt oladi</span>
+            </div>
+            <div class="ticker">
+                <span class="label">Joriy oy balansi</span>
+                <span class="num" id="ticker-num">0 UZS</span>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <div class="card-head">
+                <span class="card-title">Xarajat taqsimoti</span>
+                <span class="card-sub">AVGUST · NAMUNA</span>
+            </div>
+            <div class="donut-wrap">
+                <svg width="150" height="150" viewBox="0 0 150 150" id="donut-svg">
+                    <text x="75" y="72" text-anchor="middle" class="donut-total">2.4M</text>
+                    <text x="75" y="88" text-anchor="middle" class="donut-total-label">JAMI UZS</text>
+                </svg>
+                <div class="legend" id="legend"></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <div class="feature">
+            <svg class="ficon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M3 17l6-6 4 4 8-8"/>
+                <path d="M21 7v6h-6"/>
+            </svg>
+            <h3 data-i18n="feature1_title">Kirim va chiqim</h3>
+            <p data-i18n="feature1_text">Har bir tranzaksiyani nomi, summasi va kategoriyasi bilan kiritasiz — tarix
+                avtomatik tartiblanadi.</p>
+        </div>
+        <div class="feature">
+            <svg class="ficon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="12" cy="12" r="9"/>
+                <path d="M12 7v5l3 3"/>
+            </svg>
+            <h3 data-i18n="feature2_title">Oldindan rejalashtirish</h3>
+            <p data-i18n="feature2_text">Kelajakdagi kirim yoki chiqimni belgilab qo'ying — sana kelganda eslatma
+                keladi.</p>
+        </div>
+        <div class="feature">
+            <svg class="ficon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M4 19V9M12 19V5M20 19v-7"/>
+            </svg>
+            <h3 data-i18n="feature3_title">Aniq statistika</h3>
+            <p data-i18n="feature3_text">Kun, hafta yoki oy bo'yicha trend, kategoriya bo'yicha taqsimot — bir
+                joyda.</p>
+        </div>
+    </section>
+
+    <!-- ===== AUTENTIFIKATSIYA QILINGAN HOLAT: TO'LIQ DASHBOARD ===== -->
+    <!-- ===== AUTENTIFIKATSIYA QILINGAN HOLAT: TO'LIQ DASHBOARD ===== -->
+    <section id="dashboard" class="wrap" style="padding-left:0; padding-right:0;">
+
+        <div class="balance-card">
+            <div>
+                <div class="eyebrow" data-i18n="balance_current">Joriy balans</div>
+                <div class="balance-main" id="balance-main">—</div>
+            </div>
+            <select id="balance-currency-select" class="balance-currency-select"></select>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="chart-card" id="auth-chart-card">
+                <div class="card-head">
+                    <span class="card-title" data-i18n="chart_breakdown_title">Kirim / Xarajat taqsimoti</span>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <button type="button" class="icon-btn" id="month-prev-btn" style="width:30px; height:30px;"
+                                aria-label="Oldingi oy">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" width="15" height="15">
+                                <path d="M15 18l-6-6 6-6"/>
+                            </svg>
+                        </button>
+                        <span class="card-sub" id="month-label"
+                              style="min-width:96px; text-align:center;">JORIY OY</span>
+                        <button type="button" class="icon-btn" id="month-next-btn" style="width:30px; height:30px;"
+                                aria-label="Keyingi oy">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                 stroke-linecap="round" width="15" height="15">
+                                <path d="M9 6l6 6-6 6"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="dual-donut-wrap">
+                    <div class="donut-block">
+                        <div class="donut-block-label" data-i18n="chart_expense_dist">Xarajat</div>
+                        <div class="donut-wrap">
+                            <svg width="140" height="140" viewBox="0 0 230 230" id="auth-donut-svg-expense">
+                                <text x="115" y="110" text-anchor="middle" class="donut-total"
+                                      id="auth-donut-total-text-expense">0
+                                </text>
+                                <text x="115" y="128" text-anchor="middle" class="donut-total-label"
+                                      data-i18n="chart_total_label">JAMI UZS
+                                </text>
+                            </svg>
+                            <div class="legend" id="auth-legend-expense"></div>
+                        </div>
+                    </div>
+                    <div class="donut-block">
+                        <div class="donut-block-label" data-i18n="chart_income_dist">Kirim</div>
+                        <div class="donut-wrap">
+                            <svg width="140" height="140" viewBox="0 0 230 230" id="auth-donut-svg-income">
+                                <text x="115" y="110" text-anchor="middle" class="donut-total"
+                                      id="auth-donut-total-text-income">0
+                                </text>
+                                <text x="115" y="128" text-anchor="middle" class="donut-total-label"
+                                      data-i18n="chart_total_label">JAMI UZS
+                                </text>
+                            </svg>
+                            <div class="legend" id="auth-legend-income"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="notif-card">
+                <div class="card-title" data-i18n="dashboard_tx_title">Tranzaksiyalar tarixi</div>
+                <div id="tx-list-body" class="scroll-body">
+                    <p class="empty-note">Yuklanmoqda...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-row">
+            <button class="action-btn income" id="btn-open-income" data-i18n="btn_add_income">+ Kirim qo'shish</button>
+            <button class="action-btn expense" id="btn-open-expense" data-i18n="btn_add_expense">+ Chiqim qo'shish
+            </button>
+        </div>
+
+        <div class="notif-card" style="margin-top:20px;">
+            <div class="card-title" data-i18n="notifications_title">Bildirishnomalar</div>
+            <div id="notif-body" class="scroll-body">
+                <p class="empty-note">Yuklanmoqda...</p>
+            </div>
+        </div>
+
+    </section>
+
+</main>
+
+<!-- TRANZAKSIYA QO'SHISH MODALI -->
+<div class="modal-overlay" id="modal-overlay">
+    <div class="modal-card">
+        <h2 id="modal-title">Kirim qo'shish</h2>
+        <div class="top-error" id="modal-top-error"></div>
+
+        <form id="transaction-form" novalidate>
+            <input type="hidden" id="tx-type" value="income">
+            <input type="hidden" id="tx-mode" value="direct">
+            <input type="hidden" id="tx-edit-id" value="">
+
+            <div class="field" id="field-type-toggle" style="display:none;">
+                <label data-i18n="field_type">Turi</label>
+                <div class="type-toggle-row">
+                    <button type="button" class="type-toggle-btn" id="type-toggle-income" data-i18n="income_label">
+                        Kirim
+                    </button>
+                    <button type="button" class="type-toggle-btn" id="type-toggle-expense" data-i18n="expense_label">
+                        Chiqim
+                    </button>
+                </div>
+            </div>
+            <div class="field" id="field-name">
+                <label for="tx-name">Nomi</label>
+                <input type="text" id="tx-name" placeholder="Masalan: Oylik maosh">
+                <div class="error-text">Nomini kiriting</div>
+            </div>
+
+            <div class="row-2">
+                <div class="field" id="field-amount">
+                    <label for="tx-amount">Summa</label>
+                    <input type="number" id="tx-amount" min="0" step="0.01" placeholder="0">
+                    <div class="error-text">Summani kiriting</div>
+                </div>
+                <div class="field" id="field-currency">
+                    <label for="tx-currency">Valyuta</label>
+                    <select id="tx-currency">
+                        <option value="UZS">UZS</option>
+                        <option value="USD">USD</option>
+                        <option value="EUR">EUR</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="field" id="field-category">
+                <label for="tx-category">Kategoriya</label>
+                <select id="tx-category">
+                    <option value="">Yuklanmoqda...</option>
+                </select>
+                <div class="error-text">Kategoriyani tanlang</div>
+            </div>
+
+            <div class="field" id="field-date">
+                <label for="tx-date">Sana</label>
+                <input type="date" id="tx-date">
+            </div>
+
+            <div class="field" id="field-description">
+                <label for="tx-description">Izoh (ixtiyoriy)</label>
+                <textarea id="tx-description" placeholder="Qo'shimcha izoh..."></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="modal-cancel" id="modal-cancel-btn" data-i18n="cancel_btn">Bekor qilish
+                </button>
+                <button type="submit" class="modal-submit" id="modal-submit-btn" data-i18n="save_btn">Saqlash
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+<!-- HAMBURGER SIDE MENU -->
+<div class="side-menu-overlay" id="side-menu-overlay">
+    <aside class="side-menu" id="side-menu">
+        <div class="side-menu-head">
+            <div class="logo" style="font-size:18px;"><span class="mark"></span>Hisob</div>
+            <button class="side-menu-close" id="side-menu-close" aria-label="Yopish">&times;</button>
+        </div>
+        <div class="side-menu-user">
+            <div class="side-menu-avatar-wrap">
+                <img id="side-menu-avatar" class="side-menu-avatar" src="" alt="" style="display:none;">
+                <svg id="side-menu-avatar-placeholder" class="side-menu-avatar" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="1.5">
+                    <circle cx="12" cy="8" r="4"/>
+                    <path d="M4 20c1.5-4 5-6 8-6s6.5 2 8 6"/>
+                </svg>
+            </div>
+            <div>
+                <div class="side-menu-user-name" id="side-menu-user-name">—</div>
+                <div class="side-menu-user-email" id="side-menu-user-email"></div>
+            </div>
+        </div>
+        <button class="side-menu-item" id="menu-item-profile">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="19" height="19">
+                <circle cx="12" cy="8" r="4"/>
+                <path d="M4 20c1.5-4 5-6 8-6s6.5 2 8 6"/>
+            </svg>
+            <span data-i18n="menu_profile">Profil</span>
+        </button>
+        <button class="side-menu-item" id="menu-item-history">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="19" height="19">
+                <circle cx="12" cy="12" r="9"/>
+                <path d="M12 7v5l3 3"/>
+            </svg>
+            <span data-i18n="menu_history">Tarix</span>
+        </button>
+        <button class="side-menu-item" id="menu-item-notifications">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="19" height="19">
+                <path d="M6 8a6 6 0 0112 0c0 5 2 6 2 6H4s2-1 2-6z"/>
+                <path d="M9.5 20a2.5 2.5 0 005 0"/>
+            </svg>
+            <span data-i18n="menu_notifications">Bildirishnomalar</span>
+        </button>
+    </aside>
+</div>
+
+<!-- PROFIL MODALI -->
+<div class="modal-overlay" id="profile-modal-overlay">
+    <div class="modal-card" style="max-height:88vh; overflow-y:auto;">
+        <h2 data-i18n="profile_title">Profil</h2>
+        <div class="top-error" id="profile-top-error"></div>
+        <div class="top-success" id="profile-top-success"></div>
+
+        <form id="profile-form" novalidate>
+            <div class="avatar-row">
+                <div class="avatar-preview-wrap">
+                    <img id="avatar-preview" class="avatar-preview" src="" alt="" style="display:none;">
+                    <svg id="avatar-placeholder" class="avatar-preview" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="1.5">
+                        <circle cx="12" cy="8" r="4"/>
+                        <path d="M4 20c1.5-4 5-6 8-6s6.5 2 8 6"/>
+                    </svg>
+                </div>
+                <div>
+                    <input type="file" id="profile-avatar-input" accept="image/*" style="display:none;">
+                    <button type="button" class="avatar-upload-btn" id="avatar-upload-trigger"
+                            data-i18n="profile_change_photo">Rasmni almashtirish
+                    </button>
+                </div>
+            </div>
+            <div class="row-2">
+                <div class="field"><label data-i18n="profile_first_name">Ism</label><input type="text"
+                                                                                           id="profile-first_name">
+                </div>
+                <div class="field"><label data-i18n="profile_last_name">Familiya</label><input type="text"
+                                                                                               id="profile-last_name">
+                </div>
+            </div>
+            <div class="field"><label data-i18n="profile_username">Foydalanuvchi nomi</label><input type="text"
+                                                                                                    id="profile-username">
+            </div>
+            <div class="field"><label data-i18n="profile_email">Email</label><input type="email" id="profile-email"
+                                                                                    disabled></div>
+                       <div class="modal-actions">
+                <button type="button" class="modal-cancel" id="profile-cancel-btn" data-i18n="profile_close">Yopish
+                </button>
+                <button type="submit" class="modal-submit" id="profile-submit-btn" data-i18n="profile_save">Saqlash
+                </button>
+            </div>
+        </form>
+
+        <div class="security-divider"></div>
+        <div class="security-section">
+            <div class="security-title" data-i18n="change_password_title">Parolni o'zgartirish</div>
+            <div class="top-error" id="cp-error"></div>
+            <div class="top-success" id="cp-success"></div>
+            <form id="cp-form" novalidate>
+                <div class="field">
+                    <label data-i18n="old_password_label">Joriy parol</label>
+                    <input type="password" id="cp-old-password" autocomplete="current-password">
+                </div>
+                <div class="field">
+                    <label data-i18n="new_password_label">Yangi parol</label>
+                    <input type="password" id="cp-new-password" autocomplete="new-password">
+                </div>
+                <button type="submit" class="modal-submit" id="cp-submit-btn" data-i18n="change_password_btn">Parolni
+                    yangilash
+                </button>
+            </form>
+        </div>
+
+        <div class="security-divider"></div>
+        <div class="security-section">
+            <div class="security-title" data-i18n="change_email_title">Emailni o'zgartirish</div>
+            <div class="top-error" id="ce-error"></div>
+            <div class="top-success" id="ce-success"></div>
+            <form id="ce-request-form" novalidate>
+                <div class="field">
+                    <label data-i18n="new_email_label">Yangi email</label>
+                    <input type="email" id="ce-new-email" autocomplete="email">
+                </div>
+                <div class="field">
+                    <label data-i18n="current_password_label">Joriy parol</label>
+                    <input type="password" id="ce-current-password" autocomplete="current-password">
+                </div>
+                <button type="submit" class="modal-submit" id="ce-request-btn" data-i18n="send_code_btn">Kod yuborish
+                </button>
+            </form>
+            <form id="ce-confirm-form" novalidate style="display:none; margin-top:14px;">
+                <div class="field">
+                    <label data-i18n="otp_code_label">Tasdiqlash kodi</label>
+                    <input type="text" id="ce-code" inputmode="numeric" maxlength="6">
+                </div>
+                <button type="submit" class="modal-submit" id="ce-confirm-btn" data-i18n="confirm_code_btn">Tasdiqlash
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- TARIX MODALI -->
+<div class="modal-overlay" id="history-modal-overlay">
+    <div class="modal-card" style="max-width:480px;">
+        <h2 data-i18n="history_title">Tranzaksiyalar tarixi</h2>
+        <div id="history-body" style="max-height:420px; overflow-y:auto;">
+            <p class="empty-note">Yuklanmoqda...</p>
+        </div>
+        <div class="modal-actions" style="margin-top:18px;">
+            <button type="button" class="modal-cancel" id="history-cancel-btn" data-i18n="profile_close">Yopish</button>
+        </div>
+    </div>
+</div>
+
+<!-- BILDIRISHNOMALAR MODALI -->
+<div class="modal-overlay" id="notification-modal-overlay">
+    <div class="modal-card" style="max-width:480px;">
+        <div class="notif-corner-header">
+            <h2 style="margin-bottom:0;" data-i18n="notify_title">Notifiy</h2>
+            <button type="button" class="row-icon-btn" id="btn-open-notif-create" style="width:36px; height:36px;"
+                    aria-label="Yaratish" title="Yaratish">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                     width="18" height="18">
+                    <path d="M12 5v14M5 12h14"/>
+                </svg>
+            </button>
+        </div>
+        <div id="notification-modal-body" class="scroll-body" style="max-height:400px;">
+            <p class="empty-note">Yuklanmoqda...</p>
+        </div>
+        <div class="modal-actions" style="margin-top:18px;">
+            <button type="button" class="modal-cancel" id="notification-modal-close-btn" data-i18n="profile_close">
+                Yopish
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<footer class="wrap">
+    <span>© 2026 Hisob</span>
+    <span>UZS</span>
+</footer>
+
+<script>
+    const API_BASE = '/api/v1';
+    const PALETTE = ['#4FA381', '#C9A227', '#B5573E', '#7C9C93', '#5B655F', '#8FA6D6', '#D69E6C', '#9C7CD6'];
+
+    // ============================================================
+    // TOKEN BOSHQARUVI
+    // ============================================================
+    function getAccessToken() {
+        return localStorage.getItem('access');
+    }
+
+    function getRefreshToken() {
+        return localStorage.getItem('refresh');
+    }
+
+    function clearTokens() {
+        localStorage.removeItem('access');
+        localStorage.removeItem('refresh');
+    }
+
+    async function refreshAccessToken() {
+        const refresh = getRefreshToken();
+        if (!refresh) return false;
+        try {
+            const res = await fetch(`${API_BASE}/user/token/refresh/`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({refresh}),
+            });
+            if (!res.ok) {
+                clearTokens();
+                return false;
+            }
+            const data = await res.json();
+            localStorage.setItem('access', data.access);
+            return true;
+        } catch (err) {
+            clearTokens();
+            return false;
+        }
+    }
+
+    // Auth so'rov: GET va POST/PATCH uchun; 401 kelsa bitta marta
+    // refresh qilib qayta urinadi. Ikkinchi marta ham muvaffaqiyatsiz
+    // bo'lsa — null qaytaradi (chaqiruvchi mehmon holatiga o'tkazadi).
+    // FormData (masalan avatar yuklashda) uchun Content-Type qo'lda
+    // qo'yilmaydi — brauzer o'zi to'g'ri boundary bilan qo'yadi.
+    async function apiFetch(path, options = {}) {
+        const token = getAccessToken();
+        if (!token) return null;
+
+        const isFormData = options.body instanceof FormData;
+        const doFetch = (tok) => fetch(`${API_BASE}${path}`, {
+            ...options,
+            headers: {
+                ...(options.body && !isFormData ? {'Content-Type': 'application/json'} : {}),
+                Authorization: `Bearer ${tok}`,
+                'Accept-Language': currentLang,
+                ...(options.headers || {}),
+            },
+        });
+
+        let res = await doFetch(token);
+        if (res.status === 401) {
+            const refreshed = await refreshAccessToken();
+            if (!refreshed) return null;
+            res = await doFetch(getAccessToken());
+        }
+        return res;
+    }
+
+    let categoriesCache = [];
+
+    // Oxirgi API natijalarini keshlaymiz — til almashtirilganda
+    // API'ga qayta murojaat qilmasdan, faqat mavjud data bilan
+    // dinamik qismlarni qayta chizish uchun.
+    let lastBalanceData = null;
+    let lastStatsData = null;
+    let lastTxListData = null;
+    let lastNotifData = null;
+
+    // Joriy tildagi lug'atdan bitta kalitni olish uchun qisqa yordamchi.
+    function t(key) {
+        return (TRANSLATIONS[currentLang] || TRANSLATIONS.uz)[key] || key;
+    }
+
+    // ============================================================
+    // Bildirishnomalar bo'limida ishlatiladi: rejalashtirilgan
+    // tranzaksiyaning sanasi kelib-kelmaganini tekshirish uchun.
+    // ============================================================
+    function todayStr() {
+        return new Date().toISOString().slice(0, 10);
+    }
+
+    function hasDateArrived(dateStr) {
+        return dateStr.slice(0, 10) <= todayStr();
+    }
+
+    // ============================================================
+    // ASOSIY OQIM: sahifa yuklanganda holatni aniqlash
+    // ============================================================
+    async function init() {
+        const token = getAccessToken();
+
+        if (!token) {
+            renderGuestState();
+            return;
+        }
+
+        const profileRes = await apiFetch('/user/profile/');
+        if (!profileRes || !profileRes.ok) {
+            // Token yaroqsiz/muddati tugagan — mehmon sifatida ko'rsatamiz
+            renderGuestState();
+            return;
+        }
+
+        renderAuthenticatedState();
+    }
+
+    // ============================================================
+    // MEHMON HOLATI
+    // ============================================================
+    function renderGuestState() {
+        const nav = document.getElementById('nav-actions');
+        nav.innerHTML = `
+      <button class="btn btn-ghost" onclick="location.href='/login.html'" data-i18n="nav_login">Kirish</button>
+      <button class="btn btn-primary" onclick="location.href='/register.html'" data-i18n="nav_register">Ro'yxatdan o'tish</button>
+      ${langSwitcherHTML()}
+    `;
+        document.getElementById('hero').classList.remove('hide-for-auth');
+        document.getElementById('features').style.display = '';
+        document.getElementById('dashboard').classList.remove('show');
+        document.getElementById('menu-btn').style.display = 'none';
+
+        animateTicker(0);
+        buildDonut('donut-svg', '.donut-total', 'legend', DEMO_CATEGORY_DATA, 2400000);
+        initLangSwitcher();
+        applyTranslations();
+    }
+
+    // ============================================================
+    // LOGIN QILINGAN HOLAT — to'g'ridan-to'g'ri to'liq dashboard,
+    // hech qanday "Profilga o'tish" tugmasi/oraliq qadam yo'q
+    // ============================================================
+    async function renderAuthenticatedState() {
+        const nav = document.getElementById('nav-actions');
+        nav.innerHTML = `
+      <button class="btn btn-ghost" onclick="handleLogout()" data-i18n="nav_logout">Chiqish</button>
+      ${langSwitcherHTML()}
+    `;
+        document.getElementById('menu-btn').style.display = 'flex';
+
+        document.getElementById('hero').classList.add('hide-for-auth');
+        document.getElementById('features').style.display = 'none';
+        document.getElementById('dashboard').classList.add('show');
+
+        document.getElementById('tx-date').value = new Date().toISOString().slice(0, 10);
+
+        setupCurrencySelect();
+        initMonthNavigator();
+
+        const [categoryRes, notifRes, txListRes] = await Promise.all([
+            apiFetch('/category/list/'),
+            apiFetch('/notifications/list/'),
+            apiFetch('/transactions/list/?status=confirmed'),
+        ]);
+
+        await refreshCurrencyDependentData();
+
+        if (categoryRes && categoryRes.ok) {
+            categoriesCache = await categoryRes.json();
+            populateCategorySelect(categoriesCache);
+        }
+
+        lastNotifData = notifRes && notifRes.ok ? await notifRes.json() : null;
+        if (lastNotifData) renderNotifications(lastNotifData);
+
+        lastTxListData = txListRes && txListRes.ok ? await txListRes.json() : null;
+        renderTxList(lastTxListData);
+
+        initLangSwitcher();
+        applyTranslations();
+    }
+
+    async function handleLogout() {
+        const token = getAccessToken();
+        const refresh = getRefreshToken();
+
+        await fetch(`${API_BASE}/user/logout/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({refresh}),
+        }).catch(() => {
+        });
+
+        clearTokens();
+        window.location.href = '/login.html';
+    }
+
+    // ============================================================
+    // BALANS
+    // ============================================================
+
+
+    let activeCurrency = localStorage.getItem('displayCurrency') || 'UZS';
+
+    // ============================================================
+    // OY NAVIGATORI — statistika (diagramma) qaysi oy uchun
+    // ko'rsatilishini boshqaradi. Kelajakka o'tish cheklanmagan,
+    // lekin joriy oydan keyingi oylarda ma'lumot bo'lmaydi.
+    // ============================================================
+    const now = new Date();
+    let selectedYear = now.getFullYear();
+    let selectedMonth = now.getMonth() + 1; // 1-12
+
+    const MONTH_NAMES = {
+        uz: ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentyabr', 'Oktyabr', 'Noyabr', 'Dekabr'],
+        ru: ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'],
+        en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+        ja: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+    };
+
+    function renderMonthLabel() {
+        const names = MONTH_NAMES[currentLang] || MONTH_NAMES.uz;
+        document.getElementById('month-label').textContent = `${names[selectedMonth - 1]} ${selectedYear}`;
+    }
+
+    function initMonthNavigator() {
+        document.getElementById('month-prev-btn').addEventListener('click', async () => {
+            selectedMonth -= 1;
+            if (selectedMonth < 1) {
+                selectedMonth = 12;
+                selectedYear -= 1;
+            }
+            renderMonthLabel();
+            await refreshCurrencyDependentData();
+        });
+        document.getElementById('month-next-btn').addEventListener('click', async () => {
+            selectedMonth += 1;
+            if (selectedMonth > 12) {
+                selectedMonth = 1;
+                selectedYear += 1;
+            }
+            renderMonthLabel();
+            await refreshCurrencyDependentData();
+        });
+        renderMonthLabel();
+    }
+
+    function setupCurrencySelect() {
+        const select = document.getElementById('balance-currency-select');
+        if (select.dataset.ready) return;
+        select.innerHTML = ['UZS', 'USD', 'EUR']
+            .map(c => `<option value="${c}"${c === activeCurrency ? ' selected' : ''}>${c}</option>`)
+            .join('');
+        select.dataset.ready = '1';
+        select.addEventListener('change', async (e) => {
+            activeCurrency = e.target.value;
+            localStorage.setItem('displayCurrency', activeCurrency);
+            await refreshCurrencyDependentData();
+        });
+    }
+
+    function renderBalance(data) {
+        const mainEl = document.getElementById('balance-main');
+        if (!data) {
+            mainEl.textContent = '0 ' + activeCurrency;
+            return;
+        }
+        mainEl.textContent = Number(data.balance).toLocaleString('uz-UZ') + ' ' + data.currency;
+    }
+
+    // Balans va kategoriya diagrammalarini tanlangan valyutada (UZS/USD/EUR
+    // aralashtirib konvertatsiya qilingan holda) qayta so'raydi va chizadi.
+    async function refreshCurrencyDependentData() {
+        const [balanceRes, statsRes] = await Promise.all([
+            apiFetch(`/balance/?currency=${activeCurrency}`),
+            apiFetch(`/stats/categories/?currency=${activeCurrency}&year=${selectedYear}&month=${selectedMonth}`),
+        ]);
+        lastBalanceData = balanceRes && balanceRes.ok ? await balanceRes.json() : null;
+        renderBalance(lastBalanceData);
+        lastStatsData = statsRes && statsRes.ok ? await statsRes.json() : null;
+        renderAuthDonut(lastStatsData?.expense, 'expense');
+        renderAuthDonut(lastStatsData?.income, 'income');
+    }
+
+
+    // ============================================================
+    // TICKER — mehmon holati uchun
+    // ============================================================
+    function animateTicker(target) {
+        const el = document.getElementById('ticker-num');
+        const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReduced || !target) {
+            el.textContent = (target || 0).toLocaleString('uz-UZ') + ' UZS';
+            return;
+        }
+        let current = 0;
+        const step = Math.ceil(target / 60);
+        const timer = setInterval(() => {
+            current += step;
+            if (current >= target) {
+                current = target;
+                clearInterval(timer);
+            }
+            el.textContent = current.toLocaleString('uz-UZ') + ' UZS';
+        }, 16);
+    }
+
+    const DEMO_CATEGORY_DATA = [
+        {name: 'Oziq-ovqat', pct: 34, color: '#4FA381'},
+        {name: 'Transport', pct: 21, color: '#C9A227'},
+        {name: 'Kommunal', pct: 17, color: '#B5573E'},
+        {name: 'Ko\'ngilochar', pct: 13, color: '#7C9C93'},
+        {name: 'Boshqa', pct: 15, color: '#5B655F'},
+    ];
+
+    // ============================================================
+    // DONUT CHART — mehmon uchun namuna data bilan chizadi
+    // ============================================================
+    function buildDonut(svgId, totalSelector, legendId, data, totalAmount) {
+        const svg = document.getElementById(svgId);
+        const legend = document.getElementById(legendId);
+
+        svg.querySelectorAll('circle').forEach(el => el.remove());
+        legend.innerHTML = '';
+
+        const totalText = document.querySelector(totalSelector);
+        if (totalText) {
+            const millions = totalAmount / 1_000_000;
+            totalText.textContent = millions >= 1 ? `${millions.toFixed(1)}M` : totalAmount.toLocaleString('uz-UZ');
+        }
+
+        const r = 58, cx = 75, cy = 75;
+        const circumference = 2 * Math.PI * r;
+        let offsetAcc = 0;
+
+        data.forEach((c) => {
+            const dash = (c.pct / 100) * circumference;
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', cx);
+            circle.setAttribute('cy', cy);
+            circle.setAttribute('r', r);
+            circle.setAttribute('fill', 'none');
+            circle.setAttribute('stroke', c.color);
+            circle.setAttribute('stroke-width', '16');
+            circle.setAttribute('stroke-dasharray', `${dash} ${circumference - dash}`);
+            circle.setAttribute('stroke-dashoffset', -offsetAcc);
+            circle.setAttribute('transform', `rotate(-90 ${cx} ${cy})`);
+            circle.classList.add('donut-seg');
+            svg.insertBefore(circle, svg.firstChild);
+            offsetAcc += dash;
+
+            const row = document.createElement('div');
+            row.className = 'legend-row';
+            row.innerHTML = `
+        <span class="legend-name"><span class="dot" style="background:${c.color}"></span>${c.name}</span>
+        <span class="legend-pct">${c.pct}%</span>
+      `;
+            legend.appendChild(row);
+        });
+    }
+
+    // ============================================================
+    // DONUT CHART — login qilingan foydalanuvchi uchun haqiqiy data
+    // (kattalashtirilgan: r=95, cx=cy=115, viewBox 230x230)
+    // ============================================================
+    function renderAuthDonut(stats, suffix) {
+        const chartBody = document.getElementById(`auth-chart-body-${suffix}`);
+
+        if (!document.getElementById(`auth-donut-svg-${suffix}`)) {
+            chartBody.innerHTML = `
+      <div class="donut-wrap">
+        <svg width="180" height="180" viewBox="0 0 230 230" id="auth-donut-svg-${suffix}">
+          <text x="115" y="110" text-anchor="middle" class="donut-total" id="auth-donut-total-text-${suffix}">0</text>
+          <text x="115" y="128" text-anchor="middle" class="donut-total-label" data-i18n="chart_total_label">JAMI UZS</text>
+        </svg>
+        <div class="legend" id="auth-legend-${suffix}"></div>
+      </div>`;
+        }
+
+        const svg = document.getElementById(`auth-donut-svg-${suffix}`);
+        const legend = document.getElementById(`auth-legend-${suffix}`);
+        const totalText = document.getElementById(`auth-donut-total-text-${suffix}`);
+        svg.querySelectorAll('circle').forEach(el => el.remove());
+        legend.innerHTML = '';
+
+        const r = 95, cx = 115, cy = 115;
+        const circumference = 2 * Math.PI * r;
+
+        if (!stats || !stats.categories || !stats.categories.length) {
+            totalText.textContent = '0';
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', cx);
+            circle.setAttribute('cy', cy);
+            circle.setAttribute('r', r);
+            circle.setAttribute('fill', 'none');
+            circle.setAttribute('stroke-width', '40');
+            circle.setAttribute('stroke-dasharray', `${circumference} 0`);
+            circle.classList.add('donut-empty-seg');
+            svg.insertBefore(circle, svg.firstChild);
+
+            const row = document.createElement('div');
+            row.className = 'legend-row';
+            row.innerHTML = `<span class="legend-name" style="color:var(--ink-dim)">${t('no_data_yet')}</span>`;
+            legend.appendChild(row);
+            return;
+        }
+
+        const millions = stats.total / 1_000_000;
+        totalText.textContent = millions >= 1 ? `${millions.toFixed(1)}M` : Number(stats.total).toLocaleString('uz-UZ');
+
+        let offsetAcc = 0;
+        stats.categories.forEach((c, i) => {
+            const color = PALETTE[i % PALETTE.length];
+            const dash = (c.pct / 100) * circumference;
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', cx);
+            circle.setAttribute('cy', cy);
+            circle.setAttribute('r', r);
+            circle.setAttribute('fill', 'none');
+            circle.setAttribute('stroke', color);
+            circle.setAttribute('stroke-width', '40');
+            circle.setAttribute('stroke-dasharray', `${dash} ${circumference - dash}`);
+            circle.setAttribute('stroke-dashoffset', -offsetAcc);
+            circle.setAttribute('transform', `rotate(-90 ${cx} ${cy})`);
+            circle.classList.add('donut-seg');
+            svg.insertBefore(circle, svg.firstChild);
+            offsetAcc += dash;
+
+            const row = document.createElement('div');
+            row.className = 'legend-row';
+            row.innerHTML = `
+      <span class="legend-name"><span class="dot" style="background:${color}"></span>${c.category_name}</span>
+      <span class="legend-pct">${c.pct}%</span>
+    `;
+            legend.appendChild(row);
+        });
+    }
+
+    // ============================================================
+    // KATEGORIYA SELECT
+    // ============================================================
+    function populateCategorySelect(categories) {
+        const select = document.getElementById('tx-category');
+        select.innerHTML = categories.length
+            ? categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('')
+            : `<option value="">${t('no_categories_found')}</option>`;
+    }
+
+    // ============================================================
+    // TRANZAKSIYALAR TARIXI — diagramma yonida, faqat "confirmed"
+    // statusli tranzaksiyalar ro'yxati (eng yangilaridan).
+    // ============================================================
+    function renderTxList(transactions) {
+        const body = document.getElementById('tx-list-body');
+        if (!body) return;
+
+        if (!transactions || !transactions.length) {
+            body.innerHTML = `<p class="empty-note">${t('no_transactions')}</p>`;
+            return;
+        }
+
+        body.innerHTML = '';
+        const list = document.createElement('div');
+        list.className = 'notif-list';
+
+        transactions.slice(0, 12).forEach(tx => {
+            const isIncome = tx.type === 'income';
+            const row = document.createElement('div');
+            row.className = 'notif-item';
+            row.innerHTML = `
+        <div>
+          <div class="notif-text"><span class="n-name">${tx.name}</span></div>
+          <div class="notif-date">${tx.date ? new Date(tx.date).toLocaleDateString('uz-UZ') : ''}</div>
+        </div>
+        <span class="notif-amount ${isIncome ? 'income' : 'expense'}">${isIncome ? '+' : '−'}${Number(tx.amount).toLocaleString('uz-UZ')} ${tx.currency}</span>
+      `;
+            list.appendChild(row);
+        });
+
+        body.appendChild(list);
+    }
+
+    // ============================================================
+    // BILDIRISHNOMALAR
+    // ============================================================
+    async function renderNotifications(notifications, targetId = 'notif-body') {
+        const body = document.getElementById(targetId);
+        if (!body) return;
+
+        if (!notifications || !notifications.length) {
+            body.innerHTML = `<p class="empty-note">${t('no_notifications')}</p>`;
+            return;
+        }
+
+        // Serializer faqat "transaction" (id) qaytaradi — shuning uchun
+        // har biriga tegishli tranzaksiya tafsilotini alohida so'raymiz.
+        const detailed = await Promise.all(notifications.map(async (n) => {
+            const txId = typeof n.transaction === 'object' ? n.transaction.id : n.transaction;
+            try {
+                const res = await apiFetch(`/transactions/rud/${txId}/`);
+                if (res && res.ok) return await res.json();
+            } catch (err) { /* jim */
+            }
+            return null;
+        }));
+
+        body.innerHTML = '';
+        const list = document.createElement('div');
+        list.className = 'notif-list';
+
+        detailed.forEach((tx, i) => {
+            const row = document.createElement('div');
+            row.className = 'notif-item';
+            const txId = notifications[i].transaction;
+
+            if (!tx) {
+                row.innerHTML = `<span class="notif-text">${t('tx_hash')} #${txId}</span>`;
+                list.appendChild(row);
+                return;
+            }
+
+            const isIncome = tx.type === 'income';
+            const isPending = tx.status === 'pending';
+            const arrived = tx.date ? hasDateArrived(tx.date) : false;
+
+            let statusSide;
+            if (isPending && arrived) {
+                statusSide = `<button class="confirm-btn" onclick="confirmTransaction(${txId}, this)">${t('confirm_btn')}</button>`;
+            } else if (isPending) {
+                statusSide = `<button class="confirm-btn" disabled title="${t('confirm_disabled_title')}">${t('confirm_btn')}</button>`;
+            } else {
+                statusSide = `<span class="notif-amount ${isIncome ? 'income' : 'expense'}">${isIncome ? '+' : '−'}${Number(tx.amount).toLocaleString('uz-UZ')} ${tx.currency}</span>`;
+            }
+
+            const editPayload = encodeURIComponent(JSON.stringify(tx));
+
+            row.innerHTML = `
+        <div>
+          <div class="notif-text">
+            <span class="n-name">${tx.name}</span>
+            ${isPending ? t('planned_prefix') + ' ' : ''}${isIncome ? t('income_label') : t('expense_label')}
+            ${isPending ? '' : t('added_suffix')}
+          </div>
+          <div class="notif-date">${tx.date ? new Date(tx.date).toLocaleDateString('uz-UZ') : ''}${isPending ? ' · ' + Number(tx.amount).toLocaleString('uz-UZ') + ' ' + tx.currency : ''}</div>
+        </div>
+        <div class="row-actions">
+          ${statusSide}
+          <button type="button" class="row-icon-btn" title="${t('edit_btn')}" onclick='openModal(null, "edit", JSON.parse(decodeURIComponent("${editPayload}")))'>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>
+          </button>
+          <button type="button" class="row-icon-btn danger" title="${t('delete_btn')}" onclick="deleteTransaction(${txId})">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0l-1 14a2 2 0 01-2 2H7a2 2 0 01-2-2L4 6h16z"/></svg>
+          </button>
+        </div>
+      `;
+            list.appendChild(row);
+        });
+
+        body.appendChild(list);
+    }
+
+    // ============================================================
+    // TASDIQLASH: rejalashtirilgan tranzaksiyani "confirmed"ga o'tkazish.
+    // Bu yagona joy — status faqat shu tugma orqali, faqat sana kelgach
+    // o'zgaradi. Kirim/chiqim qo'shish formasida statusni qo'lda
+    // o'zgartirish imkoniyati yo'q.
+    // ============================================================
+    async function confirmTransaction(txId, btnEl) {
+        btnEl.disabled = true;
+        btnEl.textContent = t('sending');
+
+        try {
+            const res = await apiFetch(`/transactions/rud/${txId}/`, {
+                method: 'PATCH',
+                body: JSON.stringify({status: 'confirmed'}),
+            });
+
+            if (!res || !res.ok) {
+                btnEl.disabled = false;
+                btnEl.textContent = t('confirm_btn');
+                return;
+            }
+
+            const [notifRes, txListRes] = await Promise.all([
+                apiFetch('/notifications/list/'),
+                apiFetch('/transactions/list/?status=confirmed'),
+            ]);
+            await refreshCurrencyDependentData();
+            if (notifRes && notifRes.ok) {
+                lastNotifData = await notifRes.json();
+                renderNotifications(lastNotifData);
+                if (document.getElementById('notification-modal-overlay').classList.contains('show')) {
+                    renderNotifications(lastNotifData, 'notification-modal-body');
+                }
+            }
+            if (txListRes && txListRes.ok) {
+                lastTxListData = await txListRes.json();
+                renderTxList(lastTxListData);
+            }
+        } catch (err) {
+            btnEl.disabled = false;
+            btnEl.textContent = t('confirm_btn');
+        }
+    }
+
+    // ============================================================
+    // O'CHIRISH: tranzaksiyani (va u bilan bog'langan Notification
+    // yozuvini — CASCADE orqali avtomatik) o'chirish.
+    // ============================================================
+    async function deleteTransaction(txId) {
+        if (!confirm(t('delete_confirm'))) return;
+
+        const res = await apiFetch(`/transactions/rud/${txId}/`, {method: 'DELETE'});
+        if (!res || !res.ok) return;
+
+        const notifRes = await apiFetch('/notifications/list/');
+        if (notifRes && notifRes.ok) {
+            lastNotifData = await notifRes.json();
+            renderNotifications(lastNotifData);
+            if (document.getElementById('notification-modal-overlay').classList.contains('show')) {
+                renderNotifications(lastNotifData, 'notification-modal-body');
+            }
+        }
+    }
+
+    // ============================================================
+    // MODAL: OCHISH / YOPISH (tranzaksiya)
+    // ============================================================
+
+    // ============================================================
+    // MODAL: OCHISH / YOPISH (tranzaksiya)
+    // ============================================================
+    const overlay = document.getElementById('modal-overlay');
+    const modalTitle = document.getElementById('modal-title');
+    const submitBtn = document.getElementById('modal-submit-btn');
+
+    function setTypeToggle(type) {
+        document.getElementById('tx-type').value = type;
+        document.getElementById('type-toggle-income').classList.toggle('active', type === 'income');
+        document.getElementById('type-toggle-income').classList.toggle('income', type === 'income');
+        document.getElementById('type-toggle-expense').classList.toggle('active', type === 'expense');
+        document.getElementById('type-toggle-expense').classList.toggle('expense', type === 'expense');
+        submitBtn.classList.toggle('expense-mode', type === 'expense');
+    }
+
+    document.getElementById('type-toggle-income').addEventListener('click', () => setTypeToggle('income'));
+    document.getElementById('type-toggle-expense').addEventListener('click', () => setTypeToggle('expense'));
+
+    // mode: 'direct' (Kirim/Chiqim tugmalari), 'notification' (Notifiydan
+    // yaratish, type tanlanadi, status pending bo'lib ketadi),
+    // 'edit' (mavjud tranzaksiyani tahrirlash — editData bilan).
+    function openModal(type, mode = 'direct', editData = null) {
+        const showToggle = mode === 'notification' || mode === 'edit';
+        document.getElementById('field-type-toggle').style.display = showToggle ? 'block' : 'none';
+
+        if (mode === 'edit') {
+            modalTitle.textContent = t('modal_title_edit');
+        } else if (mode === 'notification') {
+            modalTitle.textContent = t('modal_title_plan');
+        } else {
+            modalTitle.textContent = type === 'income' ? t('modal_title_income') : t('modal_title_expense');
+        }
+
+        document.getElementById('transaction-form').reset();
+        populateCategorySelect(categoriesCache);
+        document.getElementById('tx-mode').value = mode;
+        document.getElementById('tx-edit-id').value = editData ? editData.id : '';
+        document.getElementById('modal-top-error').classList.remove('show');
+        ['name', 'amount', 'category'].forEach(f => document.getElementById(`field-${f}`).classList.remove('has-error'));
+
+        if (editData) {
+            document.getElementById('tx-name').value = editData.name || '';
+            document.getElementById('tx-amount').value = editData.amount || '';
+            document.getElementById('tx-currency').value = editData.currency || 'UZS';
+            document.getElementById('tx-category').value = editData.category || '';
+            document.getElementById('tx-date').value = editData.date ? editData.date.slice(0, 10) : new Date().toISOString().slice(0, 10);
+            document.getElementById('tx-description').value = editData.description || '';
+            setTypeToggle(editData.type || 'income');
+        } else {
+            document.getElementById('tx-date').value = new Date().toISOString().slice(0, 10);
+            setTypeToggle(type);
+        }
+
+        overlay.classList.add('show');
+    }
+
+    function closeModal() {
+        overlay.classList.remove('show');
+    }
+
+    document.getElementById('btn-open-income').addEventListener('click', () => openModal('income', 'direct'));
+    document.getElementById('btn-open-expense').addEventListener('click', () => openModal('expense', 'direct'));
+    document.getElementById('btn-open-notif-create').addEventListener('click', () => {
+        notificationOverlay.classList.remove('show');
+        openModal('income', 'notification');
+    });
+    document.getElementById('modal-cancel-btn').addEventListener('click', closeModal);
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeModal();
+    });
+
+    // ============================================================
+    // TRANZAKSIYA FORMASINI YUBORISH
+    // ============================================================
+    document.getElementById('transaction-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const topError = document.getElementById('modal-top-error');
+        topError.classList.remove('show');
+
+        const name = document.getElementById('tx-name').value.trim();
+        const amount = document.getElementById('tx-amount').value;
+        const category = document.getElementById('tx-category').value;
+
+        let valid = true;
+        document.getElementById('field-name').classList.toggle('has-error', !name);
+        document.getElementById('field-amount').classList.toggle('has-error', !amount || Number(amount) <= 0);
+        document.getElementById('field-category').classList.toggle('has-error', !category);
+        if (!name || !amount || Number(amount) <= 0 || !category) valid = false;
+        if (!valid) return;
+
+        const dateValue = document.getElementById('tx-date').value;
+        const mode = document.getElementById('tx-mode').value;
+        const editId = document.getElementById('tx-edit-id').value;
+
+        // "direct" — Kirim/Chiqim tugmalari orqali: darhol "confirmed".
+        // "notification" — Notifiy'dan yaratish: "pending" holatda
+        // yaratiladi, so'ng Notification yozuvi ham yaratiladi.
+        // "edit" — status yubormaymiz (read-only, backend e'tiborsiz qoldiradi).
+        const payload = {
+            name,
+            amount,
+            description: document.getElementById('tx-description').value.trim(),
+            type: document.getElementById('tx-type').value,
+            date: dateValue,
+            category,
+            currency: document.getElementById('tx-currency').value,
+        };
+        if (mode !== 'edit') {
+            payload.status = mode === 'notification' ? 'pending' : 'confirmed';
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = t('saving');
+
+        try {
+            const res = editId
+                ? await apiFetch(`/transactions/rud/${editId}/`, {method: 'PATCH', body: JSON.stringify(payload)})
+                : await apiFetch('/transactions/create/', {method: 'POST', body: JSON.stringify(payload)});
+            const data = res ? await res.json() : null;
+
+            if (!res || !res.ok) {
+                const msg = data ? (Object.values(data)[0]?.[0] || data.detail) : t('server_unreachable');
+                topError.textContent = msg || t('generic_error');
+                topError.classList.add('show');
+                return;
+            }
+
+            if (mode === 'notification' && !editId) {
+                // Yangi yaratilgan "pending" tranzaksiyaga bog'langan
+                // Notification yozuvini yaratamiz.
+                await apiFetch('/notifications/create/', {
+                    method: 'POST',
+                    body: JSON.stringify({transaction: data.id}),
+                });
+            }
+
+            closeModal();
+
+            if (mode === 'notification' || mode === 'edit') {
+                // Balans/statistika/tarix "confirmed" statusiga
+                // bog'liq — pending tranzaksiya ularga ta'sir qilmaydi,
+                // faqat bildirishnomalar ro'yxatini yangilaymiz.
+                const notifRes = await apiFetch('/notifications/list/');
+                if (notifRes && notifRes.ok) {
+                    lastNotifData = await notifRes.json();
+                    renderNotifications(lastNotifData);
+                    if (document.getElementById('notification-modal-overlay').classList.contains('show')) {
+                        renderNotifications(lastNotifData, 'notification-modal-body');
+                    }
+                }
+            } else {
+                const [notifRes, txListRes] = await Promise.all([
+                    apiFetch('/notifications/list/'),
+                    apiFetch('/transactions/list/?status=confirmed'),
+                ]);
+                await refreshCurrencyDependentData();
+                if (notifRes && notifRes.ok) {
+                    lastNotifData = await notifRes.json();
+                    renderNotifications(lastNotifData);
+                }
+                if (txListRes && txListRes.ok) {
+                    lastTxListData = await txListRes.json();
+                    renderTxList(lastTxListData);
+                }
+            }
+
+        } catch (err) {
+            topError.textContent = t('server_unreachable');
+            topError.classList.add('show');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = t('save_btn');
+        }
+    });
+
+    // ============================================================
+    // KO'P TILLILIK (JS-based, frontend matnlar uchun)
+    // ============================================================
+    const LANG_LIST = [
+        {code: 'uz', label: "O'zbekcha"},
+        {code: 'ru', label: 'Русский'},
+        {code: 'en', label: 'English'},
+        {code: 'ja', label: '日本語'},
+    ];
+    let currentLang = localStorage.getItem('lang') || 'uz';
+
+    const TRANSLATIONS = {
+        uz: {
+            nav_login: "Kirish",
+            nav_register: "Ro'yxatdan o'tish",
+            nav_logout: "Chiqish",
+            hero_eyebrow: "Shaxsiy moliya hisobchisi",
+            hero_lede: "Kirim va chiqimlaringizni kiriting — Hisob ularni kategoriyalarga ajratib, oylik balansingizni va xarajat taqsimotingizni bir qarashda ko'rsatadi.",
+            hero_cta_note: "Ro'yxatdan o'tish 1 daqiqa vaqt oladi",
+            feature1_title: "Kirim va chiqim",
+            feature1_text: "Har bir tranzaksiyani nomi, summasi va kategoriyasi bilan kiritasiz — tarix avtomatik tartiblanadi.",
+            feature2_title: "Oldindan rejalashtirish",
+            feature2_text: "Kelajakdagi kirim yoki chiqimni belgilab qo'ying — sana kelganda eslatma keladi.",
+            feature3_title: "Aniq statistika",
+            feature3_text: "Kun, hafta yoki oy bo'yicha trend, kategoriya bo'yicha taqsimot — bir joyda.",
+            menu_profile: "Profil",
+            menu_history: "Tarix",
+            menu_notifications: "Bildirishnomalar",
+            coming_soon: "Tez orada ishga tushadi.",
+            profile_title: "Profil",
+            profile_change_photo: "Rasmni almashtirish",
+            profile_first_name: "Ism",
+            profile_last_name: "Familiya",
+            profile_username: "Foydalanuvchi nomi",
+            profile_email: "Email",
+            profile_close: "Yopish",
+            profile_save: "Saqlash",
+            profile_saved: "Profil yangilandi",
+            history_title: "Tranzaksiyalar tarixi",
+            balance_current: "Joriy balans",
+            chart_expense_dist: "Xarajat taqsimoti",
+            current_month: "JORIY OY",
+            dashboard_tx_title: "Tranzaksiyalar tarixi",
+            notifications_title: "Bildirishnomalar",
+            btn_add_income: "+ Kirim qo'shish",
+            btn_add_expense: "+ Chiqim qo'shish",
+            chart_total_label: "JAMI UZS",
+            no_data_yet: "Hali kirim/chiqim kiritilmagan",
+            no_transactions: "Hozircha tranzaksiyalar yo'q.",
+            no_notifications: "Hozircha bildirishnomalar yo'q.",
+            no_categories_found: "Kategoriyalar topilmadi",
+            income_label: "kirim",
+            expense_label: "chiqim",
+            planned_prefix: "rejalashtirilgan",
+            added_suffix: "sifatida qo'shildi",
+            confirm_btn: "Tasdiqlash",
+            confirm_disabled_title: "Sana kelgach faollashadi",
+            sending: "Yuborilmoqda...",
+            tx_hash: "Tranzaksiya",
+            modal_title_income: "Kirim qo'shish",
+            modal_title_expense: "Chiqim qo'shish",
+            modal_title_income_plan: "Reja: Kirim qo'shish",
+            modal_title_expense_plan: "Reja: Chiqim qo'shish",
+            btn_add_plan_income: "+ Reja: Kirim",
+            btn_add_plan_expense: "+ Reja: Chiqim",
+            notify_title: "Bildirishnoma",
+            modal_title_plan: "Reja qo'shish",
+            modal_title_edit: "Tahrirlash",
+            field_type: "Turi",
+            delete_confirm: "Rostdan ham o'chirmoqchimisiz?",
+            edit_btn: "Tahrirlash",
+            delete_btn: "O'chirish",
+            change_password_title: "Parolni o'zgartirish",
+            old_password_label: "Joriy parol",
+            new_password_label: "Yangi parol",
+            change_password_btn: "Parolni yangilash",
+            password_updated: "Parol muvaffaqiyatli yangilandi",
+            change_email_title: "Emailni o'zgartirish",
+            new_email_label: "Yangi email",
+            current_password_label: "Joriy parol",
+            send_code_btn: "Kod yuborish",
+            otp_code_label: "Tasdiqlash kodi",
+            confirm_code_btn: "Tasdiqlash",
+            code_sent: "Tasdiqlash kodi yuborildi",
+            email_updated: "Email muvaffaqiyatli yangilandi",
+            field_name: "Nomi",
+            field_amount: "Summa",
+            field_currency: "Valyuta",
+            field_category: "Kategoriya",
+            field_date: "Sana",
+            field_description: "Izoh (ixtiyoriy)",
+            placeholder_name: "Masalan: Oylik maosh",
+            placeholder_description: "Qo'shimcha izoh...",
+            error_name: "Nomini kiriting",
+            error_amount: "Summani kiriting",
+            error_category: "Kategoriyani tanlang",
+            cancel_btn: "Bekor qilish",
+            save_btn: "Saqlash",
+            saving: "Saqlanmoqda...",
+            loading: "Yuklanmoqda...",
+            server_unreachable: "Server bilan bog'lanib bo'lmadi.",
+            generic_error: "Xatolik yuz berdi",
+        },
+        ru: {
+            nav_login: "Войти",
+            nav_register: "Регистрация",
+            nav_logout: "Выйти",
+            hero_eyebrow: "Личный финансовый учёт",
+            hero_lede: "Вносите доходы и расходы — Hisob распределит их по категориям и покажет баланс и структуру трат за месяц.",
+            hero_cta_note: "Регистрация займёт 1 минуту",
+            feature1_title: "Доходы и расходы",
+            feature1_text: "Указывайте название, сумму и категорию каждой операции — история сортируется автоматически.",
+            feature2_title: "Планирование заранее",
+            feature2_text: "Запланируйте будущий доход или расход — напоминание придёт в нужный день.",
+            feature3_title: "Точная статистика",
+            feature3_text: "Тренд по дням, неделям, месяцам и распределение по категориям — в одном месте.",
+            menu_profile: "Профиль",
+            menu_history: "История",
+            menu_notifications: "Уведомления",
+            coming_soon: "Скоро будет доступно.",
+            profile_title: "Профиль",
+            profile_change_photo: "Изменить фото",
+            profile_first_name: "Имя",
+            profile_last_name: "Фамилия",
+            profile_username: "Имя пользователя",
+            profile_email: "Email",
+            profile_close: "Закрыть",
+            profile_save: "Сохранить",
+            profile_saved: "Профиль обновлён",
+            history_title: "История транзакций",
+            balance_current: "Текущий баланс",
+            chart_expense_dist: "Структура расходов",
+            current_month: "ТЕКУЩИЙ МЕСЯЦ",
+            dashboard_tx_title: "История транзакций",
+            notifications_title: "Уведомления",
+            btn_add_income: "+ Добавить доход",
+            btn_add_expense: "+ Добавить расход",
+            chart_total_label: "ВСЕГО UZS",
+            no_data_yet: "Данные ещё не внесены",
+            no_transactions: "Пока нет транзакций.",
+            no_notifications: "Пока нет уведомлений.",
+            no_categories_found: "Категории не найдены",
+            income_label: "доход",
+            expense_label: "расход",
+            planned_prefix: "запланированный",
+            added_suffix: "добавлен",
+            confirm_btn: "Подтвердить",
+            confirm_disabled_title: "Активируется после наступления даты",
+            sending: "Отправка...",
+            tx_hash: "Транзакция",
+            modal_title_income: "Добавить доход",
+            modal_title_expense: "Добавить расход",
+            modal_title_income_plan: "План: доход",
+            modal_title_expense_plan: "План: расход",
+            btn_add_plan_income: "+ План: доход",
+            btn_add_plan_expense: "+ План: расход",
+            notify_title: "Уведомления",
+            modal_title_plan: "Добавить план",
+            modal_title_edit: "Редактировать",
+            field_type: "Тип",
+            delete_confirm: "Вы действительно хотите удалить?",
+            edit_btn: "Редактировать",
+            delete_btn: "Удалить",
+            change_password_title: "Изменить пароль",
+            old_password_label: "Текущий пароль",
+            new_password_label: "Новый пароль",
+            change_password_btn: "Обновить пароль",
+            password_updated: "Пароль успешно обновлён",
+            change_email_title: "Изменить email",
+            new_email_label: "Новый email",
+            current_password_label: "Текущий пароль",
+            send_code_btn: "Отправить код",
+            otp_code_label: "Код подтверждения",
+            confirm_code_btn: "Подтвердить",
+            code_sent: "Код подтверждения отправлен",
+            email_updated: "Email успешно обновлён",
+            field_name: "Название",
+            field_amount: "Сумма",
+            field_currency: "Валюта",
+            field_category: "Категория",
+            field_date: "Дата",
+            field_description: "Комментарий (необязательно)",
+            placeholder_name: "Например: Зарплата",
+            placeholder_description: "Дополнительный комментарий...",
+            error_name: "Введите название",
+            error_amount: "Введите сумму",
+            error_category: "Выберите категорию",
+            cancel_btn: "Отмена",
+            save_btn: "Сохранить",
+            saving: "Сохранение...",
+            loading: "Загрузка...",
+            server_unreachable: "Не удалось связаться с сервером.",
+            generic_error: "Произошла ошибка",
+        },
+        en: {
+            nav_login: "Log in",
+            nav_register: "Sign up",
+            nav_logout: "Log out",
+            hero_eyebrow: "Your personal finance tracker",
+            hero_lede: "Log your income and expenses — Hisob sorts them into categories and shows your monthly balance and spending breakdown at a glance.",
+            hero_cta_note: "Signing up takes 1 minute",
+            feature1_title: "Income & expenses",
+            feature1_text: "Enter each transaction with a name, amount, and category — history sorts itself.",
+            feature2_title: "Plan ahead",
+            feature2_text: "Schedule a future income or expense — you'll get a reminder when the date arrives.",
+            feature3_title: "Clear statistics",
+            feature3_text: "Daily, weekly, monthly trends and category breakdowns — all in one place.",
+            menu_profile: "Profile",
+            menu_history: "History",
+            menu_notifications: "Notifications",
+            coming_soon: "Coming soon.",
+            profile_title: "Profile",
+            profile_change_photo: "Change photo",
+            profile_first_name: "First name",
+            profile_last_name: "Last name",
+            profile_username: "Username",
+            profile_email: "Email",
+            profile_close: "Close",
+            profile_save: "Save",
+            profile_saved: "Profile updated",
+            history_title: "Transaction history",
+            balance_current: "Current balance",
+            chart_expense_dist: "Expense breakdown",
+            current_month: "THIS MONTH",
+            dashboard_tx_title: "Transaction history",
+            notifications_title: "Notifications",
+            btn_add_income: "+ Add income",
+            btn_add_expense: "+ Add expense",
+            chart_total_label: "TOTAL UZS",
+            no_data_yet: "No income or expenses yet",
+            no_transactions: "No transactions yet.",
+            no_notifications: "No notifications yet.",
+            no_categories_found: "No categories found",
+            income_label: "income",
+            expense_label: "expense",
+            planned_prefix: "planned",
+            added_suffix: "added",
+            confirm_btn: "Confirm",
+            confirm_disabled_title: "Activates once the date arrives",
+            sending: "Sending...",
+            tx_hash: "Transaction",
+            modal_title_income: "Add income",
+            modal_title_expense: "Add expense",
+            modal_title_income_plan: "Plan: income",
+            modal_title_expense_plan: "Plan: expense",
+            btn_add_plan_income: "+ Plan: income",
+            btn_add_plan_expense: "+ Plan: expense",
+            notify_title: "Notifications",
+            modal_title_plan: "Add plan",
+            modal_title_edit: "Edit",
+            field_type: "Type",
+            delete_confirm: "Are you sure you want to delete this?",
+            edit_btn: "Edit",
+            delete_btn: "Delete",
+            change_password_title: "Change password",
+            old_password_label: "Current password",
+            new_password_label: "New password",
+            change_password_btn: "Update password",
+            password_updated: "Password updated successfully",
+            change_email_title: "Change email",
+            new_email_label: "New email",
+            current_password_label: "Current password",
+            send_code_btn: "Send code",
+            otp_code_label: "Verification code",
+            confirm_code_btn: "Confirm",
+            code_sent: "Verification code sent",
+            email_updated: "Email updated successfully",
+            field_name: "Name",
+            field_amount: "Amount",
+            field_currency: "Currency",
+            field_category: "Category",
+            field_date: "Date",
+            field_description: "Note (optional)",
+            placeholder_name: "e.g. Monthly salary",
+            placeholder_description: "Additional note...",
+            error_name: "Enter a name",
+            error_amount: "Enter an amount",
+            error_category: "Select a category",
+            cancel_btn: "Cancel",
+            save_btn: "Save",
+            saving: "Saving...",
+            loading: "Loading...",
+            server_unreachable: "Could not reach the server.",
+            generic_error: "Something went wrong",
+        },
+        ja: {
+            nav_login: "ログイン",
+            nav_register: "新規登録",
+            nav_logout: "ログアウト",
+            hero_eyebrow: "パーソナル家計簿",
+            hero_lede: "収入と支出を記録すると、Hisobがカテゴリー別に分類し、月次残高と支出の内訳を一目で表示します。",
+            hero_cta_note: "登録は1分で完了します",
+            feature1_title: "収入と支出",
+            feature1_text: "名前、金額、カテゴリーを入力するだけ — 履歴は自動で整理されます。",
+            feature2_title: "事前計画",
+            feature2_text: "将来の収入や支出を登録しておくと、日付が来たときに通知されます。",
+            feature3_title: "詳細な統計",
+            feature3_text: "日・週・月ごとの傾向やカテゴリー別の内訳をひと目で確認できます。",
+            menu_profile: "プロフィール",
+            menu_history: "履歴",
+            menu_notifications: "通知",
+            coming_soon: "近日公開予定です。",
+            profile_title: "プロフィール",
+            profile_change_photo: "写真を変更",
+            profile_first_name: "名",
+            profile_last_name: "姓",
+            profile_username: "ユーザー名",
+            profile_email: "メール",
+            profile_close: "閉じる",
+            profile_save: "保存",
+            profile_saved: "プロフィールを更新しました",
+            history_title: "取引履歴",
+            balance_current: "現在の残高",
+            chart_expense_dist: "支出の内訳",
+            current_month: "今月",
+            dashboard_tx_title: "取引履歴",
+            notifications_title: "通知",
+            btn_add_income: "+ 収入を追加",
+            btn_add_expense: "+ 支出を追加",
+            chart_total_label: "合計 UZS",
+            no_data_yet: "まだ収入・支出がありません",
+            no_transactions: "まだ取引がありません。",
+            no_notifications: "まだ通知はありません。",
+            no_categories_found: "カテゴリーが見つかりません",
+            income_label: "収入",
+            expense_label: "支出",
+            planned_prefix: "予定の",
+            added_suffix: "として追加されました",
+            confirm_btn: "確認",
+            confirm_disabled_title: "日付が来ると有効になります",
+            sending: "送信中...",
+            tx_hash: "取引",
+            modal_title_income: "収入を追加",
+            modal_title_expense: "支出を追加",
+            modal_title_income_plan: "予定：収入",
+            modal_title_expense_plan: "予定：支出",
+            btn_add_plan_income: "+ 予定：収入",
+            btn_add_plan_expense: "+ 予定：支出",
+            notify_title: "通知",
+            modal_title_plan: "予定を追加",
+            modal_title_edit: "編集",
+            field_type: "種類",
+            delete_confirm: "本当に削除しますか？",
+            edit_btn: "編集",
+            delete_btn: "削除",
+            change_password_title: "パスワードを変更",
+            old_password_label: "現在のパスワード",
+            new_password_label: "新しいパスワード",
+            change_password_btn: "パスワードを更新",
+            password_updated: "パスワードが更新されました",
+            change_email_title: "メールアドレスを変更",
+            new_email_label: "新しいメールアドレス",
+            current_password_label: "現在のパスワード",
+            send_code_btn: "コードを送信",
+            otp_code_label: "確認コード",
+            confirm_code_btn: "確認",
+            code_sent: "確認コードを送信しました",
+            email_updated: "メールアドレスが更新されました",
+            field_name: "名称",
+            field_amount: "金額",
+            field_currency: "通貨",
+            field_category: "カテゴリー",
+            field_date: "日付",
+            field_description: "メモ（任意）",
+            placeholder_name: "例：月給",
+            placeholder_description: "追加のメモ...",
+            error_name: "名称を入力してください",
+            error_amount: "金額を入力してください",
+            error_category: "カテゴリーを選択してください",
+            cancel_btn: "キャンセル",
+            save_btn: "保存",
+            saving: "保存中...",
+            loading: "読み込み中...",
+            server_unreachable: "サーバーに接続できませんでした。",
+            generic_error: "エラーが発生しました",
+        },
+    };
+
+    function langSwitcherHTML() {
+        return `
+      <div class="lang-switch" id="lang-switch">
+        <button class="lang-btn" id="lang-btn" type="button">${currentLang.toUpperCase()}</button>
+        <div class="lang-dropdown" id="lang-dropdown">
+          ${LANG_LIST.map(l => `<button type="button" class="lang-option${l.code === currentLang ? ' active' : ''}" data-lang="${l.code}">${l.label}</button>`).join('')}
+        </div>
+      </div>`;
+    }
+
+    function initLangSwitcher() {
+        const btn = document.getElementById('lang-btn');
+        const dropdown = document.getElementById('lang-dropdown');
+        if (!btn || !dropdown) return;
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle('show');
+        });
+        dropdown.querySelectorAll('.lang-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                currentLang = opt.dataset.lang;
+                localStorage.setItem('lang', currentLang);
+                dropdown.classList.remove('show');
+                btn.textContent = currentLang.toUpperCase();
+                dropdown.querySelectorAll('.lang-option').forEach(o => o.classList.toggle('active', o.dataset.lang === currentLang));
+                applyTranslations();
+            });
+        });
+        document.addEventListener('click', () => dropdown.classList.remove('show'));
+    }
+
+    // Statik [data-i18n]/[data-i18n-placeholder] elementlarni yangilaydi,
+    // so'ng dashboard ochiq bo'lsa — dinamik qismlarni ham (kesh
+    // qilingan oxirgi data bilan, API'ga qayta murojaat qilmasdan)
+    // qayta chizadi.
+    function applyTranslations() {
+        const dict = TRANSLATIONS[currentLang] || TRANSLATIONS.uz;
+
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (dict[key]) el.textContent = dict[key];
+        });
+
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+            const key = el.getAttribute('data-i18n-placeholder');
+            if (dict[key]) el.placeholder = dict[key];
+        });
+
+        if (document.getElementById('dashboard').classList.contains('show')) {
+            renderBalance(lastBalanceData);
+            renderAuthDonut(lastStatsData?.expense, 'expense');
+            renderAuthDonut(lastStatsData?.income, 'income');
+            renderTxList(lastTxListData);
+            if (lastNotifData) renderNotifications(lastNotifData);
+            renderMonthLabel();
+        }
+    }
+
+    // ============================================================
+    // SIDE MENU (hamburger)
+    // ============================================================
+    function closeSideMenu() {
+        document.getElementById('side-menu-overlay').classList.remove('show');
+    }
+
+    function updateSideMenuUser(data) {
+        if (!data) return;
+        const nameEl = document.getElementById('side-menu-user-name');
+        const emailEl = document.getElementById('side-menu-user-email');
+        const avatarImg = document.getElementById('side-menu-avatar');
+        const avatarPlaceholder = document.getElementById('side-menu-avatar-placeholder');
+
+        const fullName = [data.first_name, data.last_name].filter(Boolean).join(' ').trim();
+        nameEl.textContent = fullName || data.username || '—';
+        emailEl.textContent = data.email || '';
+
+        if (data.avatar) {
+            avatarImg.src = data.avatar;
+            avatarImg.style.display = 'block';
+            avatarPlaceholder.style.display = 'none';
+        } else {
+            avatarImg.style.display = 'none';
+            avatarPlaceholder.style.display = 'block';
+        }
+    }
+
+    document.getElementById('menu-btn').addEventListener('click', async () => {
+        document.getElementById('side-menu-overlay').classList.add('show');
+        const res = await apiFetch('/user/profile/');
+        if (res && res.ok) updateSideMenuUser(await res.json());
+    });
+    document.getElementById('side-menu-close').addEventListener('click', closeSideMenu);
+    document.getElementById('side-menu-overlay').addEventListener('click', (e) => {
+        if (e.target.id === 'side-menu-overlay') closeSideMenu();
+    });
+    document.getElementById('menu-item-profile').addEventListener('click', () => {
+        closeSideMenu();
+        openProfileModal();
+    });
+    document.getElementById('menu-item-history').addEventListener('click', () => {
+        closeSideMenu();
+        openHistoryModal();
+    });
+    document.getElementById('menu-item-notifications').addEventListener('click', () => {
+        closeSideMenu();
+        openNotificationModal();
+    });
+
+    const notificationOverlay = document.getElementById('notification-modal-overlay');
+
+    async function openNotificationModal() {
+        notificationOverlay.classList.add('show');
+        document.getElementById('notification-modal-body').innerHTML = `<p class="empty-note">${t('loading')}</p>`;
+
+        const res = await apiFetch('/notifications/list/');
+        lastNotifData = res && res.ok ? await res.json() : null;
+        if (lastNotifData) renderNotifications(lastNotifData, 'notification-modal-body');
+        else document.getElementById('notification-modal-body').innerHTML = `<p class="empty-note">${t('no_notifications')}</p>`;
+    }
+
+    document.getElementById('notification-modal-close-btn').addEventListener('click', () => notificationOverlay.classList.remove('show'));
+    notificationOverlay.addEventListener('click', (e) => {
+        if (e.target === notificationOverlay) notificationOverlay.classList.remove('show');
+    });
+
+    // ============================================================
+    // PROFIL MODALI: retrieve (GET) + update (PATCH, avatar bilan)
+    // ============================================================
+    const profileOverlay = document.getElementById('profile-modal-overlay');
+    const profileForm = document.getElementById('profile-form');
+    const profileSubmitBtn = document.getElementById('profile-submit-btn');
+    const profileTopError = document.getElementById('profile-top-error');
+    const profileTopSuccess = document.getElementById('profile-top-success');
+    let selectedAvatarFile = null;
+
+async function openProfileModal() {
+    profileTopError.classList.remove('show');
+    profileTopSuccess.classList.remove('show');
+    selectedAvatarFile = null;
+    cpForm.reset();
+    cpError.classList.remove('show');
+    cpSuccess.classList.remove('show');
+    ceRequestForm.reset();
+    ceConfirmForm.reset();
+    ceConfirmForm.style.display = 'none';
+    ceError.classList.remove('show');
+    ceSuccess.classList.remove('show');
+    pendingNewEmail = null;
+    profileOverlay.classList.add('show');
+
+    const res = await apiFetch('/user/profile/');
+    if (!res || !res.ok) {
+        profileOverlay.classList.remove('show');
+        return;
+    }
+    const data = await res.json();
+    document.getElementById('profile-first_name').value = data.first_name || '';
+    document.getElementById('profile-last_name').value = data.last_name || '';
+    document.getElementById('profile-username').value = data.username || '';
+    document.getElementById('profile-email').value = data.email || '';
+    const preview = document.getElementById('avatar-preview');
+    const placeholder = document.getElementById('avatar-placeholder');
+    if (data.avatar) {
+        preview.src = data.avatar;
+        preview.style.display = 'block';
+        placeholder.style.display = 'none';
+    } else {
+        preview.style.display = 'none';
+        placeholder.style.display = 'block';
+    }
+}
+    document.getElementById('profile-cancel-btn').addEventListener('click', () => profileOverlay.classList.remove('show'));
+    profileOverlay.addEventListener('click', (e) => {
+        if (e.target === profileOverlay) profileOverlay.classList.remove('show');
+    });
+    document.getElementById('avatar-upload-trigger').addEventListener('click', () => {
+        document.getElementById('profile-avatar-input').click();
+    });
+    document.getElementById('profile-avatar-input').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        selectedAvatarFile = file;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const img = document.getElementById('avatar-preview');
+            img.src = ev.target.result;
+            img.style.display = 'block';
+            document.getElementById('avatar-placeholder').style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    });
+
+    profileForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        profileTopError.classList.remove('show');
+        profileTopSuccess.classList.remove('show');
+
+        const formData = new FormData();
+        formData.append('first_name', document.getElementById('profile-first_name').value.trim());
+        formData.append('last_name', document.getElementById('profile-last_name').value.trim());
+        formData.append('username', document.getElementById('profile-username').value.trim());
+        if (selectedAvatarFile) formData.append('avatar', selectedAvatarFile);
+
+        profileSubmitBtn.disabled = true;
+        profileSubmitBtn.textContent = '...';
+
+        try {
+            const res = await apiFetch('/user/profile/', {method: 'PATCH', body: formData});
+            const data = res ? await res.json() : null;
+
+            if (!res || !res.ok) {
+                const msg = data ? (Object.values(data)[0]?.[0] || data.detail) : t('server_unreachable');
+                profileTopError.textContent = msg || t('generic_error');
+                profileTopError.classList.add('show');
+                return;
+            }
+
+            profileTopSuccess.textContent = t('profile_saved');
+            profileTopSuccess.classList.add('show');
+            selectedAvatarFile = null;
+        } catch (err) {
+            profileTopError.textContent = t('server_unreachable');
+            profileTopError.classList.add('show');
+        } finally {
+            profileSubmitBtn.disabled = false;
+            profileSubmitBtn.textContent = t('profile_save');
+        }
+    });
+
+    // ============================================================
+    // PAROLNI O'ZGARTIRISH
+    // ============================================================
+    const cpForm = document.getElementById('cp-form');
+    const cpError = document.getElementById('cp-error');
+    const cpSuccess = document.getElementById('cp-success');
+    const cpSubmitBtn = document.getElementById('cp-submit-btn');
+
+    cpForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        cpError.classList.remove('show');
+        cpSuccess.classList.remove('show');
+
+        const oldPassword = document.getElementById('cp-old-password').value;
+        const newPassword = document.getElementById('cp-new-password').value;
+
+        cpSubmitBtn.disabled = true;
+        cpSubmitBtn.textContent = '...';
+
+        try {
+            const res = await apiFetch('/user/change/password/', {
+                method: 'POST',
+                body: JSON.stringify({old_password: oldPassword, new_password: newPassword}),
+            });
+            const data = res ? await res.json() : null;
+
+            if (!res || !res.ok) {
+                const msg = data ? (Object.values(data)[0]?.[0] || data.detail) : t('server_unreachable');
+                cpError.textContent = msg || t('generic_error');
+                cpError.classList.add('show');
+                return;
+            }
+
+            cpSuccess.textContent = data.message || t('password_updated');
+            cpSuccess.classList.add('show');
+            cpForm.reset();
+        } catch (err) {
+            cpError.textContent = t('server_unreachable');
+            cpError.classList.add('show');
+        } finally {
+            cpSubmitBtn.disabled = false;
+            cpSubmitBtn.textContent = t('change_password_btn');
+        }
+    });
+
+    // ============================================================
+    // EMAILNI O'ZGARTIRISH (ikki bosqich: kod so'rash → tasdiqlash)
+    // ============================================================
+    const ceRequestForm = document.getElementById('ce-request-form');
+    const ceConfirmForm = document.getElementById('ce-confirm-form');
+    const ceError = document.getElementById('ce-error');
+    const ceSuccess = document.getElementById('ce-success');
+    const ceRequestBtn = document.getElementById('ce-request-btn');
+    const ceConfirmBtn = document.getElementById('ce-confirm-btn');
+    let pendingNewEmail = null;
+
+    ceRequestForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        ceError.classList.remove('show');
+        ceSuccess.classList.remove('show');
+
+        const newEmail = document.getElementById('ce-new-email').value.trim();
+        const currentPassword = document.getElementById('ce-current-password').value;
+
+        ceRequestBtn.disabled = true;
+        ceRequestBtn.textContent = '...';
+
+        try {
+            const res = await apiFetch('/user/change/email/request/', {
+                method: 'POST',
+                body: JSON.stringify({new_email: newEmail, current_password: currentPassword}),
+            });
+            const data = res ? await res.json() : null;
+
+            if (!res || !res.ok) {
+                const msg = data ? (Object.values(data)[0]?.[0] || data.detail) : t('server_unreachable');
+                ceError.textContent = msg || t('generic_error');
+                ceError.classList.add('show');
+                return;
+            }
+
+            pendingNewEmail = newEmail;
+            ceSuccess.textContent = data.message || t('code_sent');
+            ceSuccess.classList.add('show');
+            ceConfirmForm.style.display = 'block';
+        } catch (err) {
+            ceError.textContent = t('server_unreachable');
+            ceError.classList.add('show');
+        } finally {
+            ceRequestBtn.disabled = false;
+            ceRequestBtn.textContent = t('send_code_btn');
+        }
+    });
+
+    ceConfirmForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        ceError.classList.remove('show');
+        ceSuccess.classList.remove('show');
+
+        const code = document.getElementById('ce-code').value.trim();
+
+        ceConfirmBtn.disabled = true;
+        ceConfirmBtn.textContent = '...';
+
+        try {
+            const res = await apiFetch('/user/change/email/confirm/', {
+                method: 'POST',
+                body: JSON.stringify({new_email: pendingNewEmail, code}),
+            });
+            const data = res ? await res.json() : null;
+
+            if (!res || !res.ok) {
+                const msg = data ? (Object.values(data)[0]?.[0] || data.detail) : t('server_unreachable');
+                ceError.textContent = msg || t('generic_error');
+                ceError.classList.add('show');
+                return;
+            }
+
+            ceSuccess.textContent = data.message || t('email_updated');
+            ceSuccess.classList.add('show');
+            document.getElementById('profile-email').value = pendingNewEmail;
+            ceRequestForm.reset();
+            ceConfirmForm.reset();
+            ceConfirmForm.style.display = 'none';
+            pendingNewEmail = null;
+
+            const freshRes = await apiFetch('/user/profile/');
+            if (freshRes && freshRes.ok) updateSideMenuUser(await freshRes.json());
+        } catch (err) {
+            ceError.textContent = t('server_unreachable');
+            ceError.classList.add('show');
+        } finally {
+            ceConfirmBtn.disabled = false;
+            ceConfirmBtn.textContent = t('confirm_code_btn');
+        }
+    });
+
+    // ============================================================
+    // TARIX MODALI: to'liq tranzaksiyalar ro'yxati (faqat "confirmed")
+    // ============================================================
+    const historyOverlay = document.getElementById('history-modal-overlay');
+
+    function categoryNameById(id) {
+        const cat = categoriesCache.find(c => String(c.id) === String(id));
+        return cat ? cat.name : '';
+    }
+
+    async function openHistoryModal() {
+        historyOverlay.classList.add('show');
+        document.getElementById('history-body').innerHTML = `<p class="empty-note">${t('loading')}</p>`;
+
+        const res = await apiFetch('/transactions/list/?status=confirmed');
+        renderHistoryList(res && res.ok ? await res.json() : null);
+    }
+
+    function renderHistoryList(transactions) {
+        const body = document.getElementById('history-body');
+
+        if (!transactions || !transactions.length) {
+            body.innerHTML = `<p class="empty-note">${t('no_transactions')}</p>`;
+            return;
+        }
+
+        body.innerHTML = '';
+        const list = document.createElement('div');
+        list.className = 'notif-list';
+
+        transactions.forEach(tx => {
+            const isIncome = tx.type === 'income';
+            const catName = categoryNameById(tx.category);
+            const row = document.createElement('div');
+            row.className = 'notif-item';
+            row.innerHTML = `
+            <div>
+                <div class="notif-text"><span class="n-name">${tx.name}</span>${catName ? ' · ' + catName : ''}</div>
+                <div class="notif-date">${tx.date ? new Date(tx.date).toLocaleDateString('uz-UZ') : ''}</div>
+            </div>
+            <span class="notif-amount ${isIncome ? 'income' : 'expense'}">${isIncome ? '+' : '−'}${Number(tx.amount).toLocaleString('uz-UZ')} ${tx.currency}</span>
+        `;
+            list.appendChild(row);
+        });
+
+        body.appendChild(list);
+    }
+
+    document.getElementById('history-cancel-btn').addEventListener('click', () => historyOverlay.classList.remove('show'));
+    historyOverlay.addEventListener('click', (e) => {
+        if (e.target === historyOverlay) historyOverlay.classList.remove('show');
+    });
+
+    init();
+</script>
+
+</body>
+</html>

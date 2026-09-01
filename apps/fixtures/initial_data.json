@@ -1,0 +1,22 @@
+[
+  {"model": "apps.category", "pk": 1,  "fields": {"name": "Oziq-ovqat",              "name_uz": "Oziq-ovqat",              "name_ru": "Еда",                        "name_en": "Food",                 "name_ja": "食費"}},
+  {"model": "apps.category", "pk": 2,  "fields": {"name": "Transport",                "name_uz": "Transport",                "name_ru": "Транспорт",                  "name_en": "Transport",             "name_ja": "交通費"}},
+  {"model": "apps.category", "pk": 3,  "fields": {"name": "Kommunal to'lovlar",       "name_uz": "Kommunal to'lovlar",       "name_ru": "Коммунальные платежи",       "name_en": "Utilities",             "name_ja": "光熱費"}},
+  {"model": "apps.category", "pk": 4,  "fields": {"name": "Ijara",                    "name_uz": "Ijara",                    "name_ru": "Аренда",                     "name_en": "Rent",                  "name_ja": "家賃"}},
+  {"model": "apps.category", "pk": 5,  "fields": {"name": "Sog'liqni saqlash",        "name_uz": "Sog'liqni saqlash",        "name_ru": "Здоровье",                   "name_en": "Health",                "name_ja": "医療費"}},
+  {"model": "apps.category", "pk": 6,  "fields": {"name": "Ta'lim",                   "name_uz": "Ta'lim",                   "name_ru": "Образование",                "name_en": "Education",             "name_ja": "教育費"}},
+  {"model": "apps.category", "pk": 7,  "fields": {"name": "Kiyim-kechak",             "name_uz": "Kiyim-kechak",             "name_ru": "Одежда",                     "name_en": "Clothing",              "name_ja": "衣服"}},
+  {"model": "apps.category", "pk": 8,  "fields": {"name": "Ko'ngilochar",             "name_uz": "Ko'ngilochar",             "name_ru": "Развлечения",                "name_en": "Entertainment",         "name_ja": "娯楽"}},
+  {"model": "apps.category", "pk": 9,  "fields": {"name": "Restoran va kafe",         "name_uz": "Restoran va kafe",         "name_ru": "Рестораны и кафе",           "name_en": "Dining out",            "name_ja": "外食"}},
+  {"model": "apps.category", "pk": 10, "fields": {"name": "Aloqa va internet",        "name_uz": "Aloqa va internet",        "name_ru": "Связь и интернет",           "name_en": "Communication",         "name_ja": "通信費"}},
+  {"model": "apps.category", "pk": 11, "fields": {"name": "Sug'urta",                 "name_uz": "Sug'urta",                 "name_ru": "Страхование",                "name_en": "Insurance",             "name_ja": "保険"}},
+  {"model": "apps.category", "pk": 12, "fields": {"name": "Sovg'alar",                "name_uz": "Sovg'alar",                "name_ru": "Подарки",                    "name_en": "Gifts",                 "name_ja": "贈り物"}},
+  {"model": "apps.category", "pk": 13, "fields": {"name": "Uy-ro'zg'or buyumlari",    "name_uz": "Uy-ro'zg'or buyumlari",    "name_ru": "Товары для дома",           "name_en": "Household items",       "name_ja": "生活用品"}},
+  {"model": "apps.category", "pk": 14, "fields": {"name": "Sayohat",                  "name_uz": "Sayohat",                  "name_ru": "Путешествия",                "name_en": "Travel",                "name_ja": "旅行"}},
+  {"model": "apps.category", "pk": 15, "fields": {"name": "Sport va fitnes",          "name_uz": "Sport va fitnes",          "name_ru": "Спорт и фитнес",             "name_en": "Sports & fitness",      "name_ja": "スポーツ・フィットネス"}},
+  {"model": "apps.category", "pk": 16, "fields": {"name": "Ish haqi",                 "name_uz": "Ish haqi",                 "name_ru": "Зарплата",                   "name_en": "Salary",                "name_ja": "給与"}},
+  {"model": "apps.category", "pk": 17, "fields": {"name": "Frilans daromadi",         "name_uz": "Frilans daromadi",         "name_ru": "Доход от фриланса",         "name_en": "Freelance income",      "name_ja": "フリーランス収入"}},
+  {"model": "apps.category", "pk": 18, "fields": {"name": "Biznes daromadi",          "name_uz": "Biznes daromadi",          "name_ru": "Доход от бизнеса",          "name_en": "Business income",       "name_ja": "事業収入"}},
+  {"model": "apps.category", "pk": 19, "fields": {"name": "Investitsiya daromadi",    "name_uz": "Investitsiya daromadi",    "name_ru": "Инвестиционный доход",      "name_en": "Investment income",     "name_ja": "投資収入"}},
+  {"model": "apps.category", "pk": 20, "fields": {"name": "Boshqa",                   "name_uz": "Boshqa",                   "name_ru": "Другое",                     "name_en": "Other",                 "name_ja": "その他"}}
+]

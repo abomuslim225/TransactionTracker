@@ -1,0 +1,147 @@
+1.Loyihahaqida asosiy malumot:
+Hisob — foydalanuvchiga o'z kirim va chiqimlarini kategoriyalar bo'yicha kuzatish, oylik balansni ko'rish, xarajat/daromad taqsimotini diagrammada kuzatish va kelajakdagi rejalashtirilgan tranzaksiyalar haqida bildirishnoma olish imkonini beruvchi vebsite
+
+loyiha 2 qismdan iborat:
+backend - Django restfreamwork
+frontend - HTML,CSS,JavaScript
+
+2.Loyiha maqsadi:
+Foydalanuvchi o'z moliyaviy holatini bitta joyda,
+tushunarli va vizual shaklda kuzata olishi,
+kirim-chiqimlarni tez kiritishi,
+kelajakdagi to'lovlarni oldindan rejalashtirishi uchun
+
+3.Texnalogiyalar:
+backend freamwork - Django, Django Restfreamwork
+authentikatsiya - JWT, rest_freamwork_simplejwt, access/refresh token
+database - PostgreSQL
+kesh - Redis(otp - code lar va urinishlarni boshqarish)
+fon vazifalari - Celery, Celery beat(kunlik valyuta kurslarini yangilash)
+multilanguage - django-modeltranslation(category name:uz/ru/en/ja)
+filtr - django-filter
+API docs - drf-spectacular (OpenAPI schema, Swagger UI)
+FrontEnd - HTML/CSS/JavaScript (fetch API), JS-based i18n (uz/ru/en/ja)
+
+4. Foydalanuvchi rollari
+auth qilinmagan — faqat landing sahifani, namunaviy diagrammani va login/register sahifalarini ko'radi.
+Ro'yxatdan o'tgan foydalanuvchi — to'liq dashboard, tranzaksiyalar, bildirishnomalar, profil bilan ishlaydi.
+
+5.Funksiyalar
+1-qism:
+Ro'yxatdan o'tish va autentifikatsiya
+
+1.Foydalanuvchi ism, familiya, foydalanuvchi nomi, email va parol (kamida 8 belgi) kiritadi.
+2.Tizim emailga 6 xonali tasdiqlash kodini yuboradi, kod Redisda 2 daqiqa saqlanadi.
+3.Foydalanuvchi kodni kiritadi; kod noto'g'ri bo'lsa urinishlar soni hisoblanadi (7 martadan ortiq noto'g'ri urinishda bloklanadi).
+4.Kod to'g'ri bo'lsa, email "tasdiqlangan" deb belgilanadi (30 daqiqa amal qiladi) va akkaunt yaratiladi.
+5.Login — email yoki foydalanuvchi nomi + parol orqali amalga oshiriladi.
+6.Muvaffaqiyatli login natijasida access va refresh JWT tokenlari qaytariladi.
+7.Access token muddati tugaganda frontend avtomatik ravishda refresh orqali yangi token oladi (bitta urinish; muvaffaqiyatsiz bo'lsa foydalanuvchi mehmon holatiga o'tkaziladi).
+8.Logout — refresh token blacklistga qo'shiladi.
+
+2 - qism:
+Profil
+1.Foydalanuvchi ism, familiya, foydalanuvchi nomini va avatarini ko'rish/tahrirlash imkoniga ega (email profil formasida faqat ko'rish uchun, alohida oqim orqali o'zgartiriladi).
+2.Parolni o'zgartirish: joriy parol tekshiriladi, yangi parol eskisidan farq qilishi shart, kamida 8 belgi.
+3.Emailni o'zgartirish (ikki bosqichli):
+4.Yangi email + joriy parol yuboriladi → tizim yangi emailga tasdiqlash kodi jo'natadi (Redisda 2 daqiqa, foydalanuvchi ID + yangi email bo'yicha nomlangan kalit ostida).
+5.Kod tasdiqlangandan so'ng email yangilanadi.
+6.Avatar rasmi multipart/form-data orqali yuklanadi.
+
+3 - qims:
+Kategoriyalar
+1.Tizimda oldindan belgilangan kategoriyalar ro'yxati mavjud (nomi 4 tilda: uz/ru/en/ja).
+2.Foydalanuvchi tranzaksiya qo'shishda kategoriya tanlaydi.
+3.Kategoriyalar ro'yxati hamma uchun ochiq (autentifikatsiyasiz ham olinishi mumkin).
+
+4 - qism:
+Tranzaksiyalar (kirim/chiqim)
+1.Har bir tranzaksiya: nomi, summasi, valyutasi (UZS/USD/EUR), turi (kirim/chiqim), sanasi, kategoriyasi, ixtiyoriy izohi va statusi (pending / confirmed) bilan yaratiladi.
+2.To'g'ridan-to'g'ri qo'shish ("+ Kirim qo'shish" / "+ Chiqim qo'shish" tugmalari) — status darhol confirmed bo'ladi, balans va statistikaga ta'sir qiladi.
+3.Rejalashtirilgan tranzaksiya (Bildirishnoma bo'limi orqali) — status pending bo'ladi, alohida Notification yozuvi bilan bog'lanadi, balansga ta'sir qilmaydi, sana kelgunicha ro'yxatda "kutilmoqda" holatida turadi.
+4.Foydalanuvchi mavjud tranzaksiyani tahrirlashi yoki o'chirishi mumkin (tranzaksiya o'chirilganda bog'liq Notification ham kaskad tarzda o'chadi).
+5.Tranzaksiyalar ro'yxati turi, kategoriyasi, valyutasi va sana oralig'i (date_from, date_to) bo'yicha filtrlanadi, nomi bo'yicha qidiriladi.
+
+5 - qism:
+Balans
+1.Foydalanuvchi tanlagan valyutada (UZS/USD/EUR) umumiy balans, jami kirim va jami chiqim hisoblab beriladi.
+2.Faqat confirmed statusli tranzaksiyalar hisobga olinadi.
+3.Turli valyutadagi tranzaksiyalar joriy kurslar asosida tanlangan valyutaga konvertatsiya qilinadi.
+
+6 - qism:
+Statistika (diagramma)
+1.Tanlangan oy va valyuta bo'yicha kirim va chiqimning kategoriyalar kesimidagi taqsimoti (foiz va summa) alohida-alohida hisoblanadi va ikkita donut-diagrammada ko'rsatiladi.
+2.Foydalanuvchi oy navigatori orqali istalgan oyga o'tishi mumkin (kelajakdagi yoki ro'yxatdan o'tishdan oldingi oylarga o'tish mumkin lekin ma'lumot bo'lmaydi).
+
+7 - qism:
+Bildirishnomalar
+1.Rejalashtirilgan (pending) tranzaksiyalar bildirishnomalar ro'yxatida ko'rsatiladi.
+2.Agar tranzaksiya sanasi kelgan bo'lsa — "Tasdiqlash" tugmasi faollashadi; bosilganda status confirmedga o'zgaradi va balans/statistika/tarixga ta'sir qila boshlaydi.
+3.Sana hali kelmagan bo'lsa — tugma bloklangan holatda ko'rsatiladi.
+4.Har bir yozuvni to'g'ridan-to'g'ri shu yerdan tahrirlash yoki o'chirish mumkin
+
+8 - qism:
+Valyuta konvertatsiyasi
+1.ExchangeRate modeli USD va EUR uchun UZSga nisbatan kursni saqlaydi.
+2.Celery Beat vositasida har 24 soatda avtomatik yangilanadi.
+3.Kurs hali yuklanmagan bo'lsa, tegishli valyutada balans/statistika so'ralganda foydalanuvchiga xato xabari qaytariladi.
+
+9 - qism:
+Ko'p tillilik
+1.Frontend interfeysi 4 tilda: o'zbek, rus, ingliz, yapon (JS lug'ati orqali, localStorageda saqlanadi).
+2.Backendga yuboriladigan so'rovlarda Accept-Language header orqali til uzatiladi (kategoriya nomlari kabi backend tarjimalari uchun).
+
+6.FrontEnd sahifalari:
+landing.html - 	Mehmon uchun — landing (namuna diagramma, xususiyatlar);
+                login qilingan foydalanuvchi uchun — to'liq dashboard (balans, ikkita diagramma, tranzaksiyalar tarixi, bildirishnomalar, tez amallar)
+register.html - 2 bosqichli: forma → OTP tasdiqlash
+login.html - Email yoki username + parol bilan login
+
+main dashboard - Dashboard ichidagi modal oynalar: tranzaksiya qo'shish/tahrirlash, profil, parolni o'zgartirish, emailni o'zgartirish, to'liq tranzaksiyalar tarixi, bildirishnomalar ro'yxati, hamburger yon menyu.
+
+7.Database modellari:
+User: Abstractuser dan meros olingan email field ga unique qilib o'zgartirilgan
+Category: name(unique va ko'p tilli)
+Transaction: user, name, type enum(income/expense), amount, currency enum(UZS/USD/EUR), date, description, category, status enum(pending/confirmed), index(name,category)
+Notification: user,transaction(ForeignKey)
+ExchangeRate: code enum(USD/EUR), rate_to_uzs, updated_at.
+
+8. API endpointlari (/api/v1/)
+
+Autentifikatsiya va foydalanuvchi:
+
+    POST /user/verify/email/ — OTP kod yuborish
+    POST /user/verify/otp/ — OTP kodni tekshirish
+    POST /user/register/ — akkaunt yaratish
+    POST /user/login/ — login (JWT olish)
+    POST /user/logout/ — logout (refresh blacklist)
+    GET/PATCH /user/profile/ — profil ko'rish/tahrirlash
+    POST /user/token/refresh/ — access tokenni yangilash
+    POST /user/change/password/ — parolni o'zgartirish
+    POST /user/change/email/request/ — yangi emailga kod yuborish
+    POST /user/change/email/confirm/ — emailni tasdiqlab yangilash
+
+Kategoriya va statistika:
+
+    GET /category/list/
+    GET /stats/categories/?currency=&year=&month=
+
+Tranzaksiyalar:
+
+    POST /transactions/create/
+    GET /transactions/list/?status=&type=&category=&currency=&date_from=&date_to=
+    GET/PATCH/DELETE /transactions/rud/<id>/
+
+Balans:
+
+    GET /balance/?currency=
+
+Bildirishnomalar:
+
+    POST /notifications/create/
+    GET /notifications/list/
+    GET/PATCH/DELETE /notifications/rud/<id>/
+
+Hujjatlar:
+
+    GET /schema/, GET /docs/ — Swagger UI

@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ro'yxatdan o'tish — Hisob</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0F1C1A;
+    --bg-alt: #16241F;
+    --paper: #EFE7D8;
+    --ink: #E9E4D8;
+    --ink-dim: #A9B0A7;
+    --income: #4FA381;
+    --expense: #B5573E;
+    --gold: #C9A227;
+    --line: rgba(233, 228, 216, 0.12);
+    --radius: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 64px 64px;
+    opacity: 0.35;
+    pointer-events: none;
+  }
+
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+  nav {
+    max-width: 1180px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 28px 32px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .logo {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .logo .mark { width: 10px; height: 10px; border-radius: 50%; background: var(--gold); }
+
+  main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--bg-alt);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 40px 36px;
+  }
+
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 14px;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 28px;
+    color: var(--paper);
+    margin-bottom: 8px;
+  }
+
+  .sub { font-size: 14px; color: var(--ink-dim); margin-bottom: 28px; }
+
+  .field { margin-bottom: 16px; }
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  label {
+    display: block;
+    font-size: 12.5px;
+    color: var(--ink-dim);
+    margin-bottom: 7px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14.5px;
+    transition: border-color 0.15s ease;
+  }
+  input:focus { border-color: var(--gold); outline: none; }
+  input::placeholder { color: #5C665F; }
+
+  .error-text {
+    font-size: 12px;
+    color: var(--expense);
+    margin-top: 6px;
+    display: none;
+  }
+  .field.has-error input { border-color: var(--expense); }
+  .field.has-error .error-text { display: block; }
+
+  .hint { font-size: 12px; color: var(--ink-dim); margin-top: 6px; }
+
+  .btn {
+    width: 100%;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14.5px;
+    font-weight: 600;
+    padding: 13px 20px;
+    border-radius: 999px;
+    border: 1px solid var(--gold);
+    background: var(--gold);
+    color: #17140A;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.15s ease, opacity 0.15s ease;
+    margin-top: 10px;
+  }
+  .btn:hover { background: #DAB847; transform: translateY(-1px); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink-dim);
+  }
+  .btn-ghost:hover { border-color: var(--gold); color: var(--gold); background: transparent; }
+  .btn-ghost:disabled:hover { border-color: var(--line); color: var(--ink-dim); }
+
+  .switch-link { text-align: center; font-size: 13.5px; color: var(--ink-dim); margin-top: 22px; }
+  .switch-link a { color: var(--gold); font-weight: 500; }
+  .switch-link a:hover { text-decoration: underline; }
+
+  .top-error {
+    background: rgba(181, 87, 62, 0.12);
+    border: 1px solid var(--expense);
+    color: #E0B3A5;
+    font-size: 13px;
+    padding: 11px 14px;
+    border-radius: 10px;
+    margin-bottom: 18px;
+    display: none;
+  }
+  .top-error.show { display: block; }
+
+  .top-success {
+    background: rgba(79, 163, 129, 0.12);
+    border: 1px solid var(--income);
+    color: #A9D9C4;
+    font-size: 13px;
+    padding: 11px 14px;
+    border-radius: 10px;
+    margin-bottom: 18px;
+    display: none;
+  }
+  .top-success.show { display: block; }
+
+  /* ---- OTP bosqichi ---- */
+  #step-otp { display: none; }
+  #step-otp.show { display: block; }
+  #step-form.hide { display: none; }
+
+  .otp-inputs {
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .otp-inputs input {
+    width: 44px;
+    height: 52px;
+    text-align: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 20px;
+    padding: 0;
+  }
+
+  .timer-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 16px 0 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+  }
+  .timer { color: var(--gold); }
+  .resend { background: none; border: none; color: var(--ink-dim); cursor: pointer; font-family: inherit; font-size: 13px; text-decoration: underline; }
+  .resend:disabled { color: #4A524C; cursor: not-allowed; text-decoration: none; }
+
+  .step-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--ink-dim);
+    font-size: 13px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 18px;
+    font-family: 'IBM Plex Sans', sans-serif;
+  }
+  .step-back:hover { color: var(--gold); }
+
+  @media (max-width: 480px) {
+    .card { padding: 32px 22px; }
+    .row-2 { grid-template-columns: 1fr; }
+    .otp-inputs input { width: 40px; height: 48px; font-size: 18px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<nav><a href="/" class="logo"><span class="mark"></span>Hisob</a></nav>
+
+<main>
+  <div class="card">
+
+    <!-- ===== 1-QADAM: RO'YXATDAN O'TISH FORMASI ===== -->
+    <div id="step-form">
+      <div class="eyebrow">Boshlash</div>
+      <h1>Hisob yarating</h1>
+      <p class="sub">Bir necha maydon — va tayyor.</p>
+
+      <div class="top-error" id="form-top-error"></div>
+
+      <form id="register-form" novalidate>
+        <div class="row-2">
+          <div class="field" id="field-first_name">
+            <label for="first_name">Ism</label>
+            <input type="text" id="first_name" name="first_name" placeholder="Dilnoza" autocomplete="given-name">
+            <div class="error-text">Ismni kiriting</div>
+          </div>
+          <div class="field" id="field-last_name">
+            <label for="last_name">Familiya</label>
+            <input type="text" id="last_name" name="last_name" placeholder="Karimova" autocomplete="family-name">
+            <div class="error-text">Familiyani kiriting</div>
+          </div>
+        </div>
+
+        <div class="field" id="field-username">
+          <label for="username">Foydalanuvchi nomi</label>
+          <input type="text" id="username" name="username" placeholder="dilnoza_k" autocomplete="username">
+          <div class="error-text">Foydalanuvchi nomini kiriting</div>
+        </div>
+
+        <div class="field" id="field-email">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="siz@misol.uz" autocomplete="email">
+          <div class="error-text">To'g'ri email kiriting</div>
+        </div>
+
+        <div class="field" id="field-password">
+          <label for="password">Parol</label>
+          <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="new-password">
+          <div class="hint">Kamida 8 belgi</div>
+          <div class="error-text">Parol kamida 8 belgidan iborat bo'lishi kerak</div>
+        </div>
+
+        <button type="submit" class="btn" id="form-submit-btn">Tasdiqlash kodini olish</button>
+      </form>
+
+      <p class="switch-link">Hisobingiz bormi? <a href="/login.html">Kiring</a></p>
+    </div>
+
+    <!-- ===== 2-QADAM: OTP TASDIQLASH ===== -->
+    <div id="step-otp">
+      <button class="step-back" id="back-btn">← Orqaga</button>
+      <div class="eyebrow">Tasdiqlash</div>
+      <h1>Kodni kiriting</h1>
+      <p class="sub" id="otp-sub">Emailingizga 6 xonali kod yubordik.</p>
+
+      <div class="top-error" id="otp-top-error"></div>
+      <div class="top-success" id="otp-top-success"></div>
+
+      <form id="otp-form" novalidate>
+        <div class="otp-inputs" id="otp-inputs">
+          <input type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="1-raqam">
+          <input type="text" inputmode="numeric" maxlength="1" aria-label="2-raqam">
+          <input type="text" inputmode="numeric" maxlength="1" aria-label="3-raqam">
+          <input type="text" inputmode="numeric" maxlength="1" aria-label="4-raqam">
+          <input type="text" inputmode="numeric" maxlength="1" aria-label="5-raqam">
+          <input type="text" inputmode="numeric" maxlength="1" aria-label="6-raqam">
+        </div>
+
+        <div class="timer-row">
+          <span class="timer" id="timer">02:00</span>
+          <button type="button" class="resend" id="resend-btn" disabled>Kodni qayta yuborish</button>
+        </div>
+
+        <button type="submit" class="btn" id="otp-submit-btn">Tasdiqlash</button>
+      </form>
+    </div>
+
+  </div>
+</main>
+
+<script>
+  const API_BASE = '/api/v1';
+  let registeredEmail = '';
+  let timerInterval = null;
+
+  // ---------- Yordamchi funksiyalar ----------
+  function setFieldError(id, hasError) {
+    document.getElementById(id).classList.toggle('has-error', hasError);
+  }
+  function showBox(id, message) {
+    const box = document.getElementById(id);
+    box.textContent = message;
+    box.classList.add('show');
+  }
+  function hideBox(id) {
+    document.getElementById(id).classList.remove('show');
+  }
+
+  // ============================================================
+  // 1-QADAM: RO'YXATDAN O'TISH FORMASI
+  // ============================================================
+  const registerForm = document.getElementById('register-form');
+  const formSubmitBtn = document.getElementById('form-submit-btn');
+
+  registerForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hideBox('form-top-error');
+    ['first_name', 'last_name', 'username', 'email', 'password'].forEach(id => setFieldError(`field-${id}`, false));
+
+    const values = {
+      first_name: document.getElementById('first_name').value.trim(),
+      last_name: document.getElementById('last_name').value.trim(),
+      username: document.getElementById('username').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      password: document.getElementById('password').value,
+    };
+
+    let valid = true;
+    if (!values.first_name) { setFieldError('field-first_name', true); valid = false; }
+    if (!values.last_name) { setFieldError('field-last_name', true); valid = false; }
+    if (!values.username) { setFieldError('field-username', true); valid = false; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) { setFieldError('field-email', true); valid = false; }
+    if (values.password.length < 8) { setFieldError('field-password', true); valid = false; }
+    if (!valid) return;
+
+    formSubmitBtn.disabled = true;
+    formSubmitBtn.textContent = 'Yuborilmoqda...';
+
+    try {
+      // OTP kodini emailga yuborish
+      const res = await fetch(`${API_BASE}/user/verify/email/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: values.email }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        showBox('form-top-error', data.email?.[0] || data.detail || 'Xatolik yuz berdi');
+        return;
+      }
+
+      // Ma'lumotlarni keyingi qadam (yakuniy ro'yxatdan o'tish) uchun saqlab qo'yamiz
+      registeredEmail = values.email;
+      window.__pendingRegisterData = values;
+
+      goToOtpStep(values.email);
+    } catch (err) {
+      showBox('form-top-error', 'Server bilan bog\'lanib bo\'lmadi.');
+    } finally {
+      formSubmitBtn.disabled = false;
+      formSubmitBtn.textContent = 'Tasdiqlash kodini olish';
+    }
+  });
+
+  // ============================================================
+  // QADAMLAR ORASIDA O'TISH
+  // ============================================================
+  function goToOtpStep(email) {
+    document.getElementById('step-form').classList.add('hide');
+    document.getElementById('step-otp').classList.add('show');
+    document.getElementById('otp-sub').textContent = `${email} manziliga 6 xonali kod yubordik.`;
+    document.getElementById('otp-inputs').querySelectorAll('input')[0].focus();
+    startTimer(120);
+  }
+
+  document.getElementById('back-btn').addEventListener('click', () => {
+    document.getElementById('step-otp').classList.remove('show');
+    document.getElementById('step-form').classList.remove('hide');
+    clearInterval(timerInterval);
+  });
+
+  // ============================================================
+  // OTP INPUT — har bir katakka bitta raqam, avtomatik keyingisiga o'tish
+  // ============================================================
+  const otpInputs = document.querySelectorAll('#otp-inputs input');
+  otpInputs.forEach((input, idx) => {
+    input.addEventListener('input', () => {
+      input.value = input.value.replace(/[^0-9]/g, '');
+      if (input.value && idx < otpInputs.length - 1) {
+        otpInputs[idx + 1].focus();
+      }
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !input.value && idx > 0) {
+        otpInputs[idx - 1].focus();
+      }
+    });
+    input.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const digits = (e.clipboardData.getData('text').match(/\d/g) || []).slice(0, 6);
+      digits.forEach((d, i) => { if (otpInputs[i]) otpInputs[i].value = d; });
+      const last = Math.min(digits.length, otpInputs.length) - 1;
+      if (last >= 0) otpInputs[last].focus();
+    });
+  });
+
+  // ============================================================
+  // TAYMER
+  // ============================================================
+  function startTimer(seconds) {
+    clearInterval(timerInterval);
+    let remaining = seconds;
+    const timerEl = document.getElementById('timer');
+    const resendBtn = document.getElementById('resend-btn');
+    resendBtn.disabled = true;
+
+    function tick() {
+      const m = String(Math.floor(remaining / 60)).padStart(2, '0');
+      const s = String(remaining % 60).padStart(2, '0');
+      timerEl.textContent = `${m}:${s}`;
+      if (remaining <= 0) {
+        clearInterval(timerInterval);
+        timerEl.textContent = 'Kod muddati tugadi';
+        resendBtn.disabled = false;
+        return;
+      }
+      remaining--;
+    }
+    tick();
+    timerInterval = setInterval(tick, 1000);
+  }
+
+  document.getElementById('resend-btn').addEventListener('click', async () => {
+    hideBox('otp-top-error');
+    try {
+      await fetch(`${API_BASE}/user/verify/email/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: registeredEmail }),
+      });
+      showBox('otp-top-success', 'Yangi kod yuborildi.');
+      startTimer(120);
+    } catch (err) {
+      showBox('otp-top-error', 'Kodni qayta yuborib bo\'lmadi.');
+    }
+  });
+
+  // ============================================================
+  // 2-QADAM: OTP TASDIQLASH + YAKUNIY RO'YXATDAN O'TISH
+  // ============================================================
+  const otpForm = document.getElementById('otp-form');
+  const otpSubmitBtn = document.getElementById('otp-submit-btn');
+
+  otpForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hideBox('otp-top-error');
+    hideBox('otp-top-success');
+
+    const code = Array.from(otpInputs).map(i => i.value).join('');
+    if (code.length !== 6) {
+      showBox('otp-top-error', 'Barcha katakchalarni to\'ldiring');
+      return;
+    }
+
+    otpSubmitBtn.disabled = true;
+    otpSubmitBtn.textContent = 'Tekshirilmoqda...';
+
+    try {
+      // 1) OTP kodni tasdiqlash
+      const otpRes = await fetch(`${API_BASE}/user/verify/otp/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: registeredEmail, code }),
+      });
+      const otpData = await otpRes.json();
+
+      if (!otpRes.ok) {
+        showBox('otp-top-error', otpData.non_field_errors?.[0] || otpData.detail || 'Kod xato');
+        return;
+      }
+
+      // 2) Kod to'g'ri bo'lsa — akkauntni yakuniy yaratish
+      const regRes = await fetch(`${API_BASE}/user/register/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(window.__pendingRegisterData),
+      });
+      const regData = await regRes.json();
+
+      if (!regRes.ok) {
+        showBox('otp-top-error', Object.values(regData)?.[0]?.[0] || 'Ro\'yxatdan o\'tishda xatolik');
+        return;
+      }
+
+      showBox('otp-top-success', 'Muvaffaqiyatli! Kirish sahifasiga yo\'naltirilmoqda...');
+      setTimeout(() => { window.location.href = '/login.html'; }, 1200);
+
+    } catch (err) {
+      showBox('otp-top-error', 'Server bilan bog\'lanib bo\'lmadi.');
+    } finally {
+      otpSubmitBtn.disabled = false;
+      otpSubmitBtn.textContent = 'Tasdiqlash';
+    }
+  });
+</script>
+
+</body>
+</html>

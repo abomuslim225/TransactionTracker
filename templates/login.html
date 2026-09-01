@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kirish — Hisob</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0F1C1A;
+    --bg-alt: #16241F;
+    --paper: #EFE7D8;
+    --ink: #E9E4D8;
+    --ink-dim: #A9B0A7;
+    --income: #4FA381;
+    --expense: #B5573E;
+    --gold: #C9A227;
+    --line: rgba(233, 228, 216, 0.12);
+    --radius: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 64px 64px;
+    opacity: 0.35;
+    pointer-events: none;
+  }
+
+  a { color: inherit; }
+
+  :focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+  nav {
+    max-width: 1180px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 28px 32px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .logo {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .logo .mark { width: 10px; height: 10px; border-radius: 50%; background: var(--gold); }
+
+  main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 400px;
+    background: var(--bg-alt);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 40px 36px;
+  }
+
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 14px;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 30px;
+    color: var(--paper);
+    margin-bottom: 8px;
+  }
+
+  .sub { font-size: 14px; color: var(--ink-dim); margin-bottom: 30px; }
+
+  .field { margin-bottom: 18px; }
+
+  label {
+    display: block;
+    font-size: 12.5px;
+    color: var(--ink-dim);
+    margin-bottom: 7px;
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 0.02em;
+  }
+
+  input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14.5px;
+    transition: border-color 0.15s ease;
+  }
+
+  input:focus { border-color: var(--gold); outline: none; }
+  input::placeholder { color: #5C665F; }
+
+  .error-text {
+    font-size: 12.5px;
+    color: var(--expense);
+    margin-top: 6px;
+    display: none;
+  }
+  .field.has-error input { border-color: var(--expense); }
+  .field.has-error .error-text { display: block; }
+
+  .btn {
+    width: 100%;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14.5px;
+    font-weight: 600;
+    padding: 13px 20px;
+    border-radius: 999px;
+    border: 1px solid var(--gold);
+    background: var(--gold);
+    color: #17140A;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.15s ease, opacity 0.15s ease;
+    margin-top: 8px;
+  }
+  .btn:hover { background: #DAB847; transform: translateY(-1px); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 26px 0 20px;
+    color: var(--ink-dim);
+    font-size: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .divider::before, .divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+
+  .switch-link { text-align: center; font-size: 13.5px; color: var(--ink-dim); }
+  .switch-link a { color: var(--gold); font-weight: 500; }
+  .switch-link a:hover { text-decoration: underline; }
+
+  .top-error {
+    background: rgba(181, 87, 62, 0.12);
+    border: 1px solid var(--expense);
+    color: #E0B3A5;
+    font-size: 13px;
+    padding: 11px 14px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    display: none;
+  }
+  .top-error.show { display: block; }
+
+  @media (max-width: 480px) {
+    .card { padding: 32px 24px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<nav><a href="/" class="logo"><span class="mark"></span>Hisob</a></nav>
+
+<main>
+  <div class="card">
+    <div class="eyebrow">Xush kelibsiz</div>
+    <h1>Hisobingizga kiring</h1>
+    <p class="sub">Email yoki foydalanuvchi nomingiz bilan davom eting.</p>
+
+    <div class="top-error" id="top-error"></div>
+
+    <form id="login-form" novalidate>
+      <div class="field" id="field-login">
+        <label for="login">Email yoki foydalanuvchi nomi</label>
+        <input type="text" id="login" name="login" placeholder="siz@misol.uz" autocomplete="username">
+        <div class="error-text">Bu maydonni to'ldiring</div>
+      </div>
+
+      <div class="field" id="field-password">
+        <label for="password">Parol</label>
+        <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password">
+        <div class="error-text">Parolni kiriting</div>
+      </div>
+
+      <button type="submit" class="btn" id="submit-btn">Kirish</button>
+    </form>
+
+    <div class="divider">yoki</div>
+    <p class="switch-link">Hisobingiz yo'qmi? <a href="/register.html">Ro'yxatdan o'ting</a></p>
+  </div>
+</main>
+
+<script>
+  // Backend API manzili — loyihangizga moslang
+  const API_BASE = '/api/v1';
+
+  const form = document.getElementById('login-form');
+  const submitBtn = document.getElementById('submit-btn');
+  const topError = document.getElementById('top-error');
+
+  function setFieldError(id, hasError) {
+    document.getElementById(id).classList.toggle('has-error', hasError);
+  }
+
+  function showTopError(message) {
+    topError.textContent = message;
+    topError.classList.add('show');
+  }
+
+  function clearErrors() {
+    topError.classList.remove('show');
+    setFieldError('field-login', false);
+    setFieldError('field-password', false);
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearErrors();
+
+    const login = document.getElementById('login').value.trim();
+    const password = document.getElementById('password').value;
+
+    let valid = true;
+    if (!login) { setFieldError('field-login', true); valid = false; }
+    if (!password) { setFieldError('field-password', true); valid = false; }
+    if (!valid) return;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Tekshirilmoqda...';
+
+    try {
+      const res = await fetch(`${API_BASE}/user/login/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ login, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showTopError(data.detail || data.non_field_errors?.[0] || 'Email yoki parol xato');
+        return;
+      }
+
+      // API javobi: { access, refresh, user: {...} }
+      localStorage.setItem('access', data.access);
+      localStorage.setItem('refresh', data.refresh);
+
+      window.location.href = '/';
+    } catch (err) {
+      showTopError("Server bilan bog'lanib bo'lmadi. Qayta urinib ko'ring.");
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Kirish';
+    }
+  });
+</script>
+
+</body>
+</html>
