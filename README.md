@@ -16,8 +16,8 @@ Kirim-chiqim (daromad va xarajatlarni) kuzatish uchun Django REST Framework asos
 ### 1. Loyihani yuklab olish
 
 ```bash
-git clone https://github.com/abomuslim225/transaction-tracker.git
-cd transaction-tracker
+git clone https://github.com/abomuslim225/TransactionTracker.git
+cd TransactionTracker
 ```
 
 ### 2. Virtual muhit yaratish va faollashtirish
